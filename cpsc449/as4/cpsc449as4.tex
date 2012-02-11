@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 449 Assignment 4 \\ J. Gallagher T01 MW 1400-1450}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\lstset{language=Haskell, frame=single}
+
+\section{Question 2}
+
+Using structural induction on $ys$, prove that for all finite lists $ys$ and $zs$
+\begin{lstlisting}
+map f (ys++zs) = map f ys ++ map f zs
+\end{lstlisting}
+
+Base Case: $ys = []$
+
+\begin{align*}
+& \text{map f ([]++(z:zs))} \\
+& \rightsquigarrow \text{map f (z:zs)} \\
+& \rightsquigarrow \text{f z : map f zs}	&\text{(map.2)} 
+\end{align*}
+\begin{align*}
+& \text{map f [] ++ map f (z:zs)} \\
+& \rightsquigarrow \text{[] ++ map f (z:zs)}	&\text{(map.1)} \\
+& \rightsquigarrow \text{[] ++ f z : map f zs}	&\text{(map.2)} \\
+& \rightsquigarrow \text{f z : map f zs}
+\end{align*}
+
+Thus the base case holds.
+
+Inductive Case:
+
+Inductive Hypothesis - assume the equation holds for the finite list $ys$ 
+
+\begin{align*}
+& \text{map f ((y:ys)++zs)} \\
+& \text{f y : map f (ys++zs)}			&\text{(map.2)} \\
+& \text{f y : ((map f ys) ++ (map f zs))}	&\text{(IH)} \\
+\end{align*}
+\begin{align*}
+& \text{(map f (y:ys)) ++ (map f zs)} \\
+& \text{(f y : map f ys) ++ (map f zs)} 	&\text{(map.2)} \\
+& \text{f y : ((map f ys) ++ (map f zs)} \\
+\end{align*}
+
+Thus the inductive step holds.
+
+Thus by structural induction on $ys$, the equation holds for all finite lists $ys$ and $zs$. $\square$
+\end{document}

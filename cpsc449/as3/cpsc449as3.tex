@@ -1,0 +1,315 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\lstset{language=Haskell, frame=single}
+
+\title{CPSC 449 Assignment 3 \\ J. Gallagher T01 MW 1400-1450}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\section{}
+
+\textbf{Question 1a}
+
+A Haskell algebraic type to represent well-formed formulas:
+
+\begin{lstlisting}
+data Formula 	= Symb Char |
+ 		Not Formula |
+ 		And Formula Formula |
+ 		Or Formula Formula
+\end{lstlisting}
+
+\textbf{Question 1b}
+
+A Haskell expression that constructs a Formula represenation of $\neg(\neg p
+\wedge \neg q)$:
+
+\begin{lstlisting}
+Not (And (Not (Symb 'p')) (Not (Symb 'q')))
+\end{lstlisting}
+
+\textbf{Question 1c}
+
+Name: showFormula
+
+Purpose: to return a string representation of a formula
+
+Parameters: an expression of type Formula as defined above
+
+Preconditions: the expression is a valid expression of type Formula
+
+Returns: a string representation of the Formula
+
+\begin{lstlisting}
+showFormula :: Formula -> String
+showFormula (Symb a)	= [a]
+showFormula (Not f)	= "~"++(showFormula f)
+showFormula (And f1 f2)	= "("++(showFormula f1)++"^"++
+				(showFormula f2)++")"
+showFormula (Or f1 f2)	= "("++(showFormula f1)++"v"++
+				(showFormula f2)++")"
+\end{lstlisting}
+
+Make Formula an instance of Show class to easily print output:
+
+\begin{lstlisting}
+instance Show Formula where
+    show f = (showFormula f)
+\end{lstlisting}
+
+\textbf{Question 1d}
+
+Name: rewrite
+
+Purpose: to remove all disjunctions from a Formula without altering meaning
+
+Parameters: an expression of type Formula as defined above
+
+Preconditions: the expression is a valid expression of type Formula
+
+Returns: a Formula logically equivalent to input without any disjunctions
+
+\begin{lstlisting}
+rewrite :: Formula -> Formula
+rewrite (Symb a)	= (Symb a)
+rewrite (Not f)		= (Not (rewrite f))
+rewrite (And f1 f2)	= (And (rewrite f1) (rewrite f2))
+rewrite (Or f1 f2)	= (Not (And (Not (rewrite f1)) 
+				(Not (rewrite f2))))
+\end{lstlisting}
+
+\textbf{Question 1e}
+
+Principle of Structural Induction for Formula:
+
+In order to prove some property P(f) $\forall$ finite formula f, it suffices
+to prove the following hold:
+
+\begin{itemize}
+\item Base case: P(Symb a) $\forall$ Char a
+\item Not case: If P(f) then P(Not f) $\forall$ finite formula f
+\item And case: If P(f1) and P(f2) then P(And f1 f2) $\forall$ finite formulas
+f1, f2
+\item Or case: If P(f1) and P(f2) then P(Or f1 f2) $\forall$ finite formulas f1,
+f2
+\end{itemize}
+
+\section{}
+
+P(f): (rewrite f) = rewrite (rewrite f) $\forall$ finite formula f.
+
+Prove P(f) using the Principle of Structural Induction for Formula.
+
+\begin{itemize}
+
+\item Base case: P(Symb a) $\forall$ Char a
+
+Show rewrite (rewrite (Symb a)) = rewrite (Symb a):
+
+\begin{align*}
+&\text{rewrite (Symb a)} \\
+&\rightsquigarrow \text{ (Symb a)}		&\text{(rewrite.1)}
+\end{align*}
+
+\begin{align*}
+&\text{rewrite (rewrite (Symb a))} \\
+&\rightsquigarrow \text{  rewrite (Symb a)}		&\text{(rewrite.1)} \\
+&\rightsquigarrow \text{ (Symb a)}				&\text{(rewrite.1)}
+\end{align*}
+
+Thus the Base case holds.
+
+\item Not case: If P(f) then P(Not f) $\forall$ finite formula f
+
+Show rewrite (rewrite (Not f)) = rewrite (Not f):
+
+Inductive Hypothesis:
+
+Assume P(f): rewrite (rewrite f) = rewrite f
+
+\begin{align*}
+&\text{rewrite (Not f)} \\
+&\rightsquigarrow \text{ Not (rewrite f)}		&\text{(rewrite.2)}
+\end{align*}
+
+\begin{align*}
+&\text{rewrite (rewrite (Not f))} \\
+&\rightsquigarrow \text{ rewrite (Not (rewrite f))}		&\text{(rewrite.2)} \\
+&\rightsquigarrow \text{ Not (rewrite (rewrite f))}		&\text{(rewrite.2)} \\
+&\rightsquigarrow \text{ Not (rewrite f)}				&\text{P(f)}
+\end{align*}
+
+Thus the Not case holds.
+
+\item And case: If P(f1) and P(f2) then P(And f1 f2) $\forall$ finite formulas
+f1, f2
+
+Show rewrite (rewrite (And f1 f2)) = rewrite (And f1 f2):
+
+Inductive Hypothesis:
+
+Assume P(f1): rewrite (rewrite f1) = rewrite f1
+
+Assume P(f2): rewrite (rewrite f2) = rewrite f2
+
+\begin{align*}
+&\text{rewrite (And f1 f2)} \\
+&\rightsquigarrow \text{ And (rewrite f1) (rewrite f2)}		&\text{(rewrite.3)}
+\end{align*}
+
+\begin{align*}
+&\text{rewrite (rewrite (And f1 f2))} \\
+&\rightsquigarrow \text{ rewrite (And (rewrite f1) (rewrite f2))}
+&\text{(rewrite.3)} \\
+&\rightsquigarrow \text{ And (rewrite (rewrite f1)) (rewrite (rewrite f2))}
+&\text{(rewrite.3)} \\
+&\rightsquigarrow \text{ And (rewrite f1) (rewrite f2)}
+&\text{(P(f1),P(f2))}
+\end{align*}
+
+Thus the And case holds.
+
+\item Or case: If P(f1) and P(f2) then P(Or f1 f2) $\forall$ finite formulas
+f1, f2
+
+Show rewrite (rewrite (Or f1 f2)) = rewrite (Or f1 f2):
+
+Inductive Hypothesis:
+
+Assume P(f1): rewrite (rewrite f1) = rewrite f1
+
+Assume P(f2): rewrite (rewrite f2) = rewrite f2
+
+\begin{align*}
+&\text{rewrite (Or f1 f2)} \\
+&\rightsquigarrow \text{ Not ( And (Not (rewrite f1)) (Not (rewrite f2)))}	
+&\text{(rewrite.4)}
+\end{align*}
+
+\begin{align*}
+&\text{rewrite (rewrite (Or f1 f2))} \\
+&\rightsquigarrow \text{ rewrite (Not ( And (Not (rewrite f1)) (Not (rewrite
+f2))))}	&\text{(rewrite.4)} \\
+&\rightsquigarrow \text{ Not (rewrite (And (Not (rewrite f1)) (Not (rewrite
+f2))))}	
+&\text{(rewrite.2)} \\
+&\rightsquigarrow \text{ Not (And (rewrite (Not (rewrite f1))) (rewrite (Not
+(rewrite f2))))}	&\text{(rewrite.3)} \\
+&\rightsquigarrow \text{ Not (And (Not (rewrite (rewrite f1))) (Not
+(rewrite (rewrite f2))))}	&\text{(rewrite.2)} \\
+&\rightsquigarrow \text{ Not ( And (Not (rewrite f1)) (Not (rewrite f2)))}	
+&\text{(P(f1),P(f2))}
+\end{align*}
+
+Thus the Or case holds.
+
+By the Principle of Structural Induction for Formula, P(f) holds $\forall$
+finite formula f. Thus (rewrite f) = rewrite (rewrite f) $\forall$ finite
+formula f. $\square$
+
+\end{itemize}
+
+\section{}
+
+\textbf{Question 3a}
+
+Name: or
+
+Purpose: to determine whether at least one element of the list is True
+
+Parameters: a list of Bools
+
+Preconditions: the input is a valid list of Bools
+
+Returns: True if at least one element of the list is True, False otherwise
+
+\begin{lstlisting}
+or :: [Bool] -> Bool
+or xs = foldr (||) False xs
+\end{lstlisting}
+
+\textbf{Question 3b}
+
+Name: count
+
+Purpose: to determine the number of occurences of an Int in a list of Ints
+
+Parameters: an Int to be checked and a list of Ints
+
+Preconditions: the input is a valid list of Ints and an Int
+
+Returns: an Int representing the number of occurences of the element in the list
+
+\begin{lstlisting}
+count :: Int -> [Int] -> Int
+count x ys = length (filter (==x) ys)
+\end{lstlisting}
+
+\section{}
+
+\textbf{Question 4a}
+
+Name: iter
+
+Purpose: to apply f n times to some input x
+
+Parameters: an Int representing number of composites, a function, and an input
+
+Preconditions: the function is of type (a\textemdash$>$a) and the input is of
+type a
+
+Returns: output of type a resulting from applying f to x n times
+
+The type of iter will be a, where a is the type of the input to the function,
+which has type (a\textemdash$>$a). The function works by first generating a
+list composed solely of the function f of length n using replicate, then folding
+the function composition operator (.) into the list, ending with the identity
+function id. The composition of f's is then applied to x.
+
+\begin{lstlisting}
+iter :: Int->(a->a)->a->a
+iter n f x = (foldr (.) id (replicate n f)) x
+\end{lstlisting}
+
+\textbf{Question 4b}
+
+Name: double
+
+Purpose: given some integer, double multiplies it by two
+
+Parameters: some Int
+
+Preconditions: none
+
+Returns: double the input
+
+\begin{lstlisting}
+double :: Int -> Int
+double x = 2*x
+\end{lstlisting}
+
+Name: twoToThePowerOf
+
+Purpose: to calculate the nth power of two
+
+Parameters: some Int
+
+Preconditions: input is greater than or equal to 0
+
+Returns: two raised to the power of the input
+
+\begin{lstlisting}
+twoToThePowerOf :: Int -> Int
+twoToThePowerOf n = (iter n (double) 1)
+\end{lstlisting}
+
+\end{document}

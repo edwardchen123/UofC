@@ -1,0 +1,300 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\lstset{language=Haskell, frame=single}
+
+\title{CPSC 449 Assignment 2 \\ J. Gallagher T01 MW 1400-1450}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\thispagestyle{myheadings}
+
+\section{Programming: Questions 1-3}
+
+\textbf{Question 1a}
+
+Purpose: to square all odd items in a list of integers
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of integers
+
+\begin{lstlisting}
+oddSquaresA :: [Int]->[Int]
+oddSquaresA xs = [x*x | x<-xs, (odd x)]
+\end{lstlisting}
+
+\textbf{Question 1b}
+
+Purpose: to square all odd items in a list of integers
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of integers
+
+\begin{lstlisting}
+oddSquaresB :: [Int]->[Int]
+oddSquaresB [] = []
+oddSquaresB (x:xs)
+    | (odd x)	= (x*x):(oddSquaresB xs)
+    | otherwise	= (oddSquaresB xs)
+\end{lstlisting}
+    
+\newpage
+
+\thispagestyle{myheadings}
+\markright{10023875}
+
+\textbf{Question 2 (List Comprehension)}
+
+Purpose: to remove all duplicates from a set of integers
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of unique integers
+
+\begin{lstlisting}
+uniqueA :: [Int]->[Int]
+uniqueA xs = [x | x<-xs, (isUniqueIn x xs)]
+\end{lstlisting}
+
+\textbf{Question 2 (Primitive Recursion)}
+
+Purpose: to remove all duplicates from a set of integers
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of unique integers
+
+\begin{lstlisting}
+uniqueB ::[Int]->[Int]
+uniqueB [] = []
+uniqueB (x:xs)
+    | (contains x xs)	= (uniqueB (removeAll x xs))
+    | otherwise		= x:(uniqueB xs)
+\end{lstlisting}
+    
+\textbf{Question 3a}
+
+Purpose: to merge two sorted lists such that the end result is sorted
+
+Parameters: two lists of integers to be merged
+
+Preconditions: both lists of integers are sorted in ascending order
+
+Returns: a sorted list of integers
+
+\begin{lstlisting}
+mergeLists :: [Int]->[Int]->[Int]
+mergeLists [] [] = []
+mergeLists [] ys = ys
+mergeLists xs [] = xs
+mergeLists (x:xs) (y:ys)
+    | x<=y		= x:(mergeLists xs (y:ys))
+    | otherwise		= y:(mergeLists (x:xs) ys)
+\end{lstlisting}
+    
+\newpage
+
+\pagestyle{myheadings}
+
+\textbf{Question 3b}
+
+Purpose: to split a list into two lists, one of even indices one of odd
+
+Parameters: a list of integers to be split
+
+Preconditions: none
+
+Returns: a tuple of two integer lists whose union is the original list
+
+\begin{lstlisting}
+splitList :: [Int]->([Int],[Int])
+splitList [] = ([],[])
+splitList (x:xs)
+    | (xs==[])	= ([x],[])
+    | otherwise	= (x:(skipOne (tail xs)),(skipOne xs))
+\end{lstlisting}
+
+Purpose: to generate a list from an input list by taking every second element
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of integers
+
+\begin{lstlisting}
+skipOne :: [Int]->[Int]
+skipOne [] = []
+skipOne (x:xs)
+    | (xs==[])		= [x]
+    | otherwise		= x:(skipOne (tail xs))
+\end{lstlisting}
+
+\textbf{Question 3c}
+
+Purpose: to sort a list of integers with mergesort
+
+Parameters: a list of integers
+
+Preconditions: none
+
+Returns: a list of integers
+
+\begin{lstlisting}
+mSort :: [Int]->[Int]
+mSort [] = []
+mSort (x:xs)
+    | (xs==[])	= [x]
+    | otherwise	= mergeLists(mSort(x:(skipOne(tail xs))))
+				    (mSort(skipOne xs))
+\end{lstlisting}
+    
+\newpage
+
+\textbf{Useful functions written by myself:}
+
+Purpose: to check if a list of integers contains a certain element
+
+Parameters: an element to be checked and a list of integers
+
+Preconditions: none
+
+Returns: True or False if the element is or is not in the list
+
+\begin{lstlisting}
+contains :: Int->[Int]->Bool
+contains x xs
+    = case xs of
+	   [] -> False
+	   (y:ys) -> (x==y) || (contains x ys)
+\end{lstlisting}
+
+Purpose: to find the number of instances of an element in a list
+
+Parameters: an element to be checked and a list of integers
+
+Preconditions: none
+
+Returns: an integer specifying number of occurences in the list
+
+\begin{lstlisting}
+instancesOf :: Int->[Int]->Int
+instancesOf n [] = 0
+instancesOf n (x:xs)
+    | (n==x)		= 1 + (instancesOf n xs)
+    | otherwise		= (instancesOf n xs)
+\end{lstlisting}
+
+Purpose: to determine if there is exactly one occurence of an element in a list
+
+Parameters: an element to be checked and a list of integers
+
+Preconditions: none
+
+Returns: True or False if the element is or is not unique
+
+\begin{lstlisting}
+isUniqueIn :: Int->[Int]->Bool
+isUniqueIn x xs = (instancesOf x xs) == 1
+\end{lstlisting}
+    
+\newpage
+
+Purpose: to remove all instances of an element in a list
+
+Parameters: an element to be removed and a list of integers
+
+Preconditions: none
+
+Returns: a list with all occurences of the specified element gone
+
+\begin{lstlisting}
+removeAll :: Int->[Int]->[Int]
+removeAll n [] = []
+removeAll n (x:xs)
+    | (x==n)		= (removeAll n xs)
+    | otherwise		= x:(removeAll n xs)
+\end{lstlisting}
+
+\section{Written Proof: Question 4}
+
+\textbf{(a)}
+
+Base Case: $P([\:])$
+
+Induction Step: $P(xs) \Rightarrow P(x:xs)$
+
+\textbf{(b)}
+
+Proving the base case $P([\:])$, $\forall \: n \in \mathbb{Z}$:
+
+\begin{align*}
+&\text{ or (match n [ ])} \\
+&\rightsquigarrow \text{or ([ ])}			&(match.1) \\
+&\rightsquigarrow \text{False}				&(or.1)
+\end{align*}
+
+Thus \textbf{or (match x [ ]) = False}.
+
+\begin{align*}
+&\text{ elem n [ ]} \\
+&\rightsquigarrow \text{False}				&(elem.1)
+\end{align*}
+
+Thus \textbf{elem x [ ] = False} as well, and so the base case holds.
+
+\newpage
+
+\textbf{(c)}
+
+Proving the inductive step, $P(xs) \Rightarrow P(x:xs)$:
+
+Assume $P(xs)$ is true. Then \textbf{or (match n xs) = elem n xs}, $\forall \:
+n \in \mathbb{Z}$.
+
+Consider $P(x:xs)$:
+
+\begin{align*}
+&\text{ or (match n (x:xs))} \\
+&\rightsquigarrow \text{ or ((n==x):(match n xs))}	&(match.2) \\
+&\rightsquigarrow \text{ (n==x)$||$(or (match n xs))}	&(or.2)		
+\end{align*}
+
+Thus \textbf{or (match n (x:xs)) = (n==x)$||$(or (match n xs))}.
+
+\begin{align*}
+&\text{ elem n (x:xs)} \\
+&\rightsquigarrow \text{ (n==x)$||$(elem n xs)}		&(elem.2) \\
+\end{align*}
+
+Thus \textbf{elem n (x:xs) = (n==x)$||$(elem n xs)}. So we have:
+
+\begin{align*}
+&\text{elem n (x:xs) = (n==x)$||$(elem n xs)} \\
+&\text{elem n (x:xs) = (n==x)$||$(or (match n xs))}	&\text{by }P(xs) \\
+&\text{elem n (x:xs) = or (match n (x:xs))} \\
+\end{align*}
+
+So $P(xs) \Rightarrow P(x:xs)$, and by structural induction the equality
+\textbf{or (match n xs) = elem n xs} holds $\forall \: n \in \mathbb{Z}$ and
+$\forall$ finite lists xs. $\square$
+
+\end{document}

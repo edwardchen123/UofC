@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\lstset{language=Prolog, frame = single}
+
+\title{CPSC 449 - Prolog}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\section{Prolog Basics}
+
+\begin{itemize}
+\item Short for PROgramming LOGic
+\item Prolog revolves around facts and queries on those facts
+\item Three fundamental concepts:
+\begin{itemize}
+\item Facts - things which are unconditionally true
+\item Rules - things which are conditionally true
+\item Queries - questions answered using facts and rules
+\end{itemize}
+\item Fact example:
+\begin{lstlisting}
+girl(allison).
+father(don, allison).
+\end{lstlisting}
+\item Rule example:
+\begin{lstlisting}
+father(don, allison) :- daughter(allison, don).
+\end{lstlisting}
+\item If Don is Allison's father, then Allison is Don's daughter
+\item Logical And is represented with , (comma) logical Or with ; (semicolon)
+\begin{lstlisting}
+daughter(allison, don) :- 
+	father(don, allison), 
+	girl(allison).
+\end{lstlisting}
+\item Variables are specified by starting with an upper-case letter
+\begin{lstlisting}
+?- girl(X).
+\end{lstlisting}
+\item This will return allison in the current knowledge base
+\item ; (semicolon) will cause Prolog to backtrack and re-satisfy a variable
+\item The ; is a way of getting Prolog to simulate nondeterminism
+\end{itemize}
+
+\section{Pattern Matching and Recursion}
+
+\begin{itemize}
+\item Patterns in Prolog are checked top to bottom, left to right
+\item Recursive rules are an important part of Prolog:
+\begin{lstlisting}
+ancestor(X,Y) :- parent(X,Y).
+ancestor(X,Y) :- parent(Z,Y), ancestor(X,Z).
+\end{lstlisting}
+\item parent is the base case, while ancestor is the general case
+\item Lists are also an important part of Prolog
+\item They are represented by a head element followed by the tail
+\item $[\:]$ represents the empty list
+\begin{lstlisting}
+elemOf(X, [X | T]).
+elemOf(X, [H | T]) :- member(X, T).
+\end{lstlisting}
+\item If Prolog cannot satisfy a query, it will return false
+\item Only the cases where a relationship is true need be considered
+\end{itemize}
+
+
+\end{document}

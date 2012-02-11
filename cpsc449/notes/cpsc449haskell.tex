@@ -1,0 +1,516 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\lstset{language=Haskell, frame = single}
+
+\title{CPSC 449 - Haskell}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\section{Programming Paradigms}
+
+\begin{itemize}
+\item A programming paradigm determines how you will solve a given problem
+\item Imperative programming:
+\begin{itemize}
+\item Has a global, mutable state
+\item Commands mutate the global state in some way
+\item A program is a sequence of commands
+\item Repetition is achieved through iteration
+\item Example languages: Pascal, Fortran, Algol, C, ADA, Python
+\end{itemize}
+\item Object-oriented programming:
+\begin{itemize}
+\item Imperative programming with data abstraction
+\item Example languages: C++, Java, Smalltalk, C$\#$, Python
+\end{itemize}
+\item Functional programming:
+\begin{itemize}
+\item Uses evaluation of expressions instead of execution of commands
+\item No global state
+\item Repetition is achieved through recursion
+\item Example langauges: Haskell, ML, Scheme, Lisp
+\end{itemize}
+\item Logic programming:
+\begin{itemize}
+\item Describes result in terms of attributes and constraints
+\item Complete opposite of imperative programming
+\item Example languages: Prolog, G\"{o}del
+\end{itemize}
+\end{itemize}
+
+\section{Haskell Basics}
+
+\begin{itemize}
+\item Function names start with a lowercase letter, types with an uppercase:
+\begin{lstlisting}
+name :: Type
+\end{lstlisting}
+\item Multiple parameters may also be defined (Type3 is the returned type):
+\begin{lstlisting}
+name :: Type1->Type2->Type3
+\end{lstlisting}
+\item Functions are implemented as follows:
+\begin{lstlisting}
+name args = body
+\end{lstlisting}
+\item Pattern matching is one way of enabling conditional function behaviour:
+\begin{lstlisting}
+name valA = valB
+name valC = valD
+\end{lstlisting}
+\item Pattern matching is checked sequentially and returns if a match is found
+\item Underscore (\_) matches arguments not used in the return value expression
+\item To specify function behaviour for a collection of values, guards are used:
+\begin{lstlisting}
+name arg1, arg2
+	| (f arg1 arg2)	= arg1
+	| otherwise		= arg2
+\end{lstlisting}
+\item The standard library in Haskell is known as Prelude
+\item Modules may be defined by placing the following in a Haskell file:
+\begin{lstlisting}
+module ModuleName where
+\end{lstlisting}
+\item Modules may also be imported into other modules:
+\begin{lstlisting}
+import ModuleName
+\end{lstlisting}
+\item It is sometimes necessary to override a Prelude function with your own:
+\begin{lstlisting}
+import Prelude hiding (name)
+\end{lstlisting}
+\item Logical operators on Bools:
+\begin{itemize}
+\item And: $\&\&$
+\item Or: $||$
+\item Not: not
+\end{itemize}
+\item Ordering operators on Ints:
+\begin{itemize}
+\item Less than: $<$
+\item Greater than: $>$
+\item Equal to: $==$
+\item Not equal to: $/=$
+\item Less than or equal to: $<=$
+\item Greater than or equal to: $>=$
+\end{itemize}
+\end{itemize}
+
+\section{Evaluation of Expressions}
+
+\begin{itemize}
+\item Every subexpression of an expression is called a redex
+\item Every evaluation step reduces a redex to a simpler but equivalent form
+\item Haskell has lazy evaluation, so expressions are expanded before reduction:
+\begin{align*}
+&23 - (\text{double }(3+1)) \\
+&\rightsquigarrow 23 - (2*(3+1))            & \text{double} \\
+&\rightsquigarrow 23 - (2*4)                & \text{arithmetic} \\
+&\rightsquigarrow 23 - 8                    & \text{arithmetic} \\
+&\rightsquigarrow 15                        & \text{arithmetic} 
+\end{align*}
+\item In the above, double was evaluated on (3+1) before (3+1) was evaluated
+\item A slightly different process is followed to evaluate functions with
+guards:
+\begin{align*}
+&\text{maxThree  6 (4+3) 5} \\
+&\text{?? } 6 >= (4+3) \text{ \&\& } 6 >= 5 		&\text{check maxThree.1}\\
+&??\rightsquigarrow 6 >= 7 \text{ \&\& } 6 >= 7 	&\text{logic} \\
+&??\rightsquigarrow \text{False } \&\& \text{ True} &\text{logic} \\
+&??\rightsquigarrow \text{False } 					&\text{logic} \\
+&\text{?? } 7 >= 5 									&\text{check maxThree.2} \\
+&??\rightsquigarrow \text{True } 					&\text{logic}	\\		
+&\rightsquigarrow 7									&\text{maxThree.2} \\
+\end{align*}
+\end{itemize}
+
+\section{Tuples and Lists}
+
+\begin{itemize}
+\item Tuples are composed of $n$ values of certain (possibly different) types:
+\begin{lstlisting}
+type Tuple = (Type1,Type2,Type3)
+\end{lstlisting}
+\item Elements in a pair tuple may be accessed using fst and snd
+\item Lists are composed of an arbitrary number of values of a single type
+\item The list constructor [ ] is an element of every list type
+\item The operator ++ is used to concatenate two lists together ([a]++[b])
+\item The operator : is used to prepend some element to a list (a:[b])
+\item The operator !! returns the nth element of the list (xs!!n)
+\item Prelude list functions:
+\begin{itemize}
+\item concat: concatenates a list of lists into a single list
+\item length: returns the number of elements in the list
+\item head, last: returns the first or last element of the list
+\item tail, init: returns all but first or last elements of the list
+\item take, drop: returns or removes the first n elements of the list
+\item splitAt: splits the list into a pair tuple of lists at the nth element
+\item reverse: reverses the order of the elements in the list
+\item zip, unzip: turns a pair of lists into a list of pairs or vice versa
+\item and, or: returns the conjunction or disjunction of a list of booleans
+\item sum, product: returns the sum or product of a list of numerics
+\end{itemize}
+\item List comprehension generates a list from some other list xs:
+\begin{itemize}
+\begin{lstlisting}
+[(f n) | n<-xs, (g n)]
+\end{lstlisting}
+\item Generation: n $<$\textemdash xs generates all elements of xs
+\item Test: (g n) tests every $n$ in xs for a certain condition
+\item Transform: (f n) transforms every $n$ in xs such that (g n) is true
+\end{itemize}
+\end{itemize}
+
+\section{Recursion in Haskell}
+
+\begin{itemize}
+\item Instead of iteration, repetition is achieved through recursion in Haskell
+\item Primitive recursion:
+\begin{itemize}
+\item Composed of two cases - base case and recursive case
+\item Recursive case calls function with smaller input
+\item Termination occurs when base case is reached
+\item Primitive recursion is only applicable when using greedy algorithms
+\end{itemize}
+\item There are three fundamental patterns of primitive recursion:
+\begin{itemize}
+\item Accumulation: combine elements of a list using some operation
+\item Transformation: map every element of a list to a different value
+\item Selection: generate a subset of a list according to some restriction
+\end{itemize}
+\item General recursion:
+\begin{itemize}
+\item May have more than one base case
+\item May recurse on multiple arguments
+\item More difficult to prove correctness and termination
+\item Any algorithm may be implemented using general recursion
+\item Every primitive recursive function is a general recursive function
+\end{itemize}
+\end{itemize}
+
+\section{Defining Functions Over Lists}
+
+\begin{itemize}
+\item In actuality lists are defined $x_1:x_2:\ldots:x_n:[\:]$
+\item This easily allows primitive recursion to be used on lists
+\item Patterns are one of the following:
+\begin{itemize}
+\item Literal value: True, 0, etc.
+\item Variable: x, xs, etc.
+\item Wildcard: (\_)
+\item Tuple pattern: $(p_1,\ldots,p_n)$ where $p_1,\ldots,p_n$ are patterns
+\item Constructor applied to patterns: (x:xs)
+\end{itemize}
+\item Pattern matching is used to decide which operations to perform on a list:
+\begin{lstlisting}
+name :: [Type]->[Type]
+name [] 		= []
+name (x:xs)
+	| (f x)		= x:(name xs)
+	| otherwise 	= (name xs)
+\end{lstlisting}
+\item The list constructor [ ] is the base case, with : used in the recursive
+case
+\item The case construction may also be used:
+\begin{lstlisting}
+name :: [Type]->[Type]
+name xs
+    = case (f xs) of
+	[] -> []
+	(y:ys) -> y:(name ys)
+\end{lstlisting}
+\item Local definitions may be created inside a function to increase simplicity:
+\begin{lstlisting}
+name :: [Type]->[Type]
+name xs	= (f ys zs)
+	where
+	ys = (g xs)
+	zs = (h xs)
+\end{lstlisting}
+\end{itemize}
+
+\section{Structural Induction}
+
+\begin{itemize}
+\item Proving total correctness requires proving the following:
+\begin{itemize}
+\item Partial correctness: assuming termination, output is correct
+\item Termination: the function terminates on all valid input
+\end{itemize}
+\item Termination is guaranteed with primitive recursive functions
+\item Structural induction thus proves total correctness
+\item Structural induction - show $P(ys)$ holds for all finite lists $ys$:
+\begin{itemize}
+\item Show the base case $P([\:])$ holds
+\item Show the inductive step $P(xs) \Rightarrow P(x:xs)$ holds
+\end{itemize}
+\item Strengthening the inductive hypothesis is a good strategy in some cases
+\item Note that structural induction is distinct from mathematical induction
+\end{itemize}
+
+\section{Higher-Order Functions}
+
+\begin{itemize}
+\item A first-class object possesses the properties such that it:
+\begin{itemize}
+\item May be passed as an argument
+\item May be returned as a function value
+\item May be stored in a data structure
+\end{itemize}
+\item Functions are first-class objects in functional languages
+\item A higher-order function of a functional language is a function that:
+\begin{itemize}
+\item Accepts function arguments
+\item Returns function values
+\end{itemize}
+\end{itemize}
+
+\section{Functions as Arguments}
+
+\begin{itemize}
+\item Functions in Haskell may be passed as arguments to other functions:
+\begin{lstlisting}
+f :: Type1->Type2
+g :: (Type1->Type2)->Type3
+\end{lstlisting}
+\item In the above, f could be passed as an argument to g
+\item There are several higher-order functions implementing recursion patterns
+\item Fundamental pattern of recursion: Accumulation
+\begin{itemize}
+\begin{lstlisting}
+foldr :: (a->b->b)->b->[a]->b
+\end{lstlisting}
+\item Accepts a function as input and folds folds it between list elements
+\item foldr1 does not need an identity element but fails on empty lists
+\end{itemize}
+\item Fundamental pattern of recursion: Transformation
+\begin{itemize}
+\begin{lstlisting}
+map :: (a->b)->[a]->[b]
+\end{lstlisting}
+\item Accepts a function as input and applies it to every element of the list
+\end{itemize}
+\item Fundamental pattern of recursion: Selection
+\begin{itemize}
+\begin{lstlisting}
+filter :: (a->Bool)->[a]->[a]
+\end{lstlisting}
+\item Constructs a new list from elements satisfying the input function
+\end{itemize}
+\end{itemize}
+
+\section{Functions as Values}
+
+\begin{itemize}
+\item Composition of functions in Haskell is defined by (.) :
+\begin{lstlisting}
+f = g . h
+\end{lstlisting}
+\item The above would first apply any input to f to h, then g
+\item (.) is therefore defined as:
+\begin{lstlisting}
+(.) :: (b->c)->(a->b)->(a->c)
+\end{lstlisting}
+\item The type of the second function must match the argument type of the first
+\item The function id is defined as follows:
+\begin{lstlisting}
+id :: a->a
+id a = a
+\end{lstlisting}
+\item Since f . id == f, id can be a base case for some recursive functions
+\item Consider the following, which returns a function applied $n$ times:
+\begin{lstlisting}
+iter :: Int->(a->a)->(a->a)
+iter n f = foldr (.) id (replicate n f)
+\end{lstlisting}
+\item The above unifies the concept of a function being a first-class object
+\item We can also use the where construction to return functions as values:
+\begin{lstlisting}
+f :: Int->(Int->Int)
+f x	= g
+	where
+	g y = x+y
+\end{lstlisting}
+\item Lambda notation is a simpler way of defining a function to return:
+\begin{lstlisting}
+f :: Int->(Int->Int)
+f x = (\y -> x+y)
+\end{lstlisting}
+\item Lambda-defined functions are known as anonymous functions
+\item Any function accepting two or more arguments may be partially applied:
+\begin{lstlisting}
+multiply :: Int->Int->Int
+multiply x y = x*y
+
+doubleAll :: [Int]->[Int]
+doubleAll = map (multiply 2)
+\end{lstlisting}
+\item In actuality, every function in Haskell takes exactly one argument
+\item The partially applied function is then applied to the other arguments
+\end{itemize}
+
+\section{Overloading and Type Classes}
+
+\begin{itemize}
+\item Polymorphic functions have the same behaviour for all types
+\item Overloaded functions act differently for each type
+\item The set of types over which a function is defined is called a type class
+\item Members of a type class are called instances of that type class
+\item A polymorphic function may be constrained to the type class Eq as follows:
+\begin{lstlisting}
+f :: Eq a => a -> a -> Bool
+f x y = (x==y)
+\end{lstlisting}
+\item Since f is defined only for instances of Eq, (==) is always defined in f
+\item The part before the $=>$ is called the context of the function
+\item Multiple constraints on different types may be levelled in the context
+\item Custom classes may be declared as follows:
+\begin{lstlisting}
+class Name a where
+	f :: a -> b
+	g :: a -> c
+\end{lstlisting}
+\item The declaration defines the name of the class and then the signature
+\item A type is an instance of the class if the signature functions are defined:
+\begin{lstlisting}
+instance Name Int where
+	f x = x
+	g x = (h x)
+\end{lstlisting}
+\item Signature functions may be defined in terms of each other by default
+\item Classes may also derive from other classes; consider the Ord class:
+\begin{lstlisting}
+class Eq a => Ord a where
+	(<), (<=), (>), (>=)	:: a -> a -> Bool
+	max, min		:: a -> a -> a
+	compare			:: a -> a -> Ordering
+\end{lstlisting}
+\item The Ord class inherits all the operations of the Eq class
+\end{itemize}
+
+\section{Built-in Haskell Classes}
+
+\begin{itemize}
+\item Equality (Eq):
+\begin{lstlisting}
+class Eq a where
+ (==), (/=) :: a -> a -> Bool
+\end{lstlisting}
+\item Ordering (Ord):
+\begin{lstlisting}
+class (Eq a) => Ord a where
+	(<), (<=), (>), (>=)	:: a -> a -> Bool
+	max, min		:: a -> a -> a
+	compare			:: a -> a -> Ordering
+\end{lstlisting}
+\item Enumeration (Enum):
+\begin{lstlisting}
+class (Ord a) => Enum a where
+	toEnum		:: Int -> a
+	fromEnum	:: a -> Int
+	enumFrom	:: a -> [a]
+	enumFromThen	:: a -> a -> [a]
+	enumFromTo	:: a -> a -> [a]
+	enumFromThenTo	:: a -> a -> a -> a -> [a]
+\end{lstlisting}
+\item Bounded types (Bounded):
+\begin{lstlisting}
+class Bounded a where
+	minBound, maxBound :: a
+\end{lstlisting}
+\item From values to strings (Show):
+\begin{lstlisting}
+class Show a where
+	showsPrec	:: Int -> a -> ShowS
+	show		:: a -> String
+	showList	:: [a] -> ShowS
+\end{lstlisting}
+\item From strings to values (Read):
+\begin{lstlisting}
+class Read a where
+	read	:: String -> a
+\end{lstlisting}
+\end{itemize}
+
+\section{Algebraic Types}
+
+\begin{itemize}
+\item Algebraic types are generalized language constructs
+\item The most basic algebraic type is the enumerated type:
+\begin{lstlisting}
+data Bool = True | False
+\end{lstlisting}
+\item Enumerated types have values limited to their explicit definition
+\item True and False are the constructors of type Bool
+\item Product types amalgamate other types:
+\begin{lstlisting}
+data People = Person Name Age
+\end{lstlisting}
+\item Person is a constructor for People, and may be represented thus:
+\begin{lstlisting}
+Person :: Name -> Age -> People
+\end{lstlisting}
+\item A product type may have multiple constructors
+\item An algebraic type can be defined to be an instance of any class
+\item The system may be asked to supply instantiations of classes as follows:
+\begin{lstlisting}
+data Season = Spring | Summer | Autumn | Winter
+		deriving (Eq, Ord, Show, Read)
+\end{lstlisting}
+\item Defining algebraic types recursively allows for much greater expression
+\item Consider the recursive algebraic type of a list of integers:
+\begin{lstlisting}
+data IntList = EmptyList | ConsPair Int IntList
+\end{lstlisting}
+\item In the above, EmptyList is [ ] and ConsPair is equivalent to (:)
+\item The list $[1,2,3]$ would be represented thus:
+\begin{lstlisting}
+(ConsPair 1 (ConsPair 2 (ConsPair 3 EmptyList)))
+\end{lstlisting}
+\item Constructors may also be used in infix form:
+\begin{lstlisting}
+(1 'ConsPair' (2 'ConsPair' (3 'ConsPair' EmptyList)))
+\end{lstlisting}
+\item Constructors may also be defined and then used in infix form sans quotes:
+\begin{lstlisting}
+data IntList = EmptyList | Int :ConsPair: IntList
+\end{lstlisting}
+\item Two mutually recursive algebraic types use each other in their definition
+\item Polymorphism may also be used when defining algebraic types:
+\begin{lstlisting}
+data List a = EmptyList | ConsPair a IntList
+\end{lstlisting}
+\end{itemize}
+
+\section{Induction on Algebraic Types}
+
+\begin{itemize}
+\item For structural induction over an algebraic type:
+\begin{itemize}
+\item Construct a base case for each nonrecursive constructor
+\item Construct an inductive hypothesis for each recursive constructor
+\end{itemize}
+\item If a constructor recurses on multiple values, assume their conjunction
+\end{itemize}
+
+\section{Lazy Evaluation}
+
+\begin{itemize}
+\item Expressions in Haskell are not evaluated until they are needed
+\item If expressions are not needed, they will not be evaluated at all
+\item A duplicated expression is never evaluated more than once
+\item Expressions are evaluated from outside in and left to right
+\item A construct taking advantage of this is infinite lists
+\item An infinite list is defined but only evaluated to $n$ when requested
+\end{itemize}
+
+\end{document}
