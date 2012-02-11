@@ -1,0 +1,273 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 \\ Assignment 1 - Analysis of Simple Algorithms}
+\author{Andrew Helwer}
+\date{February 2011}
+\maketitle
+
+\section{Partial Correctness of FindLeaf}
+
+\emph{Precondition:}	
+\begin{itemize}
+\item A nonempty binary tree $T$ is given as input
+\end{itemize}
+
+\emph{Postcondition:}
+\begin{itemize} \item A leaf of $T$ is returned as output 
+\item The tree $T$ has not been changed 
+\end{itemize}
+
+\textbf{Assertion A:} $v:=$ the root of $T$ and $T$ has not been modified
+
+\textbf{Assertion B:} $v:=$ a leaf of $T$ and $T$ has not been modified
+
+\textbf{Assertion C:} $v$ is an interior vertex of $T$
+
+\textbf{Assertion D:} The depth of $v$ has increased by one, and $T$ has not
+been modified
+
+Assuming the precondition is satisfied, $T$ is nonempty - that is, it contains
+at least one element, the root vertex. $v$ is set equal to this vertex before
+execution of the loop, satistfying assertion $A$ as simply changing the
+reference $v$ does not modify $T$.
+
+If there is only one vertex in $T$, then $v$ (the root vertex) is a leaf and
+the loop invariant $C$ is not satisfied. If there is more than one vertex in
+$T$, then $v$ will be an interior vertex of $T$ as the root must then have at
+least one child (either left or right) and so $C$ will be satisfied and the
+loop entered.
+
+By satisfying $C$ and entering the loop, $v$ is guaranteed to have either a
+left or right child, specified $v.left$ and $v.right$ respectively. Once the
+loop body has executed, $v$ has been set to either $v.left$ or $v.right$, and so
+the number of $v:=v.parent$ operations it would take to reach the root node has
+increased by one - thus the depth of $v$ has increased by one, partially
+satisfying $D$. As well, the operations $v:=v.left$ and $v:=v.right$ make no
+modifications to $T$ - they change only the reference $v$. Thus $T$ is not
+modified during the loop body, and $D$ is fully satisfied. Therefore $C
+\Rightarrow D$ over execution of the loop body.
+
+$C$ is once again tested for, and if satisfied the loop body again executes. If
+$C$ is not satisfied, the loop is exited. Since $C$ is not satisfied, $v$ is not
+an interior vertex of $T$. Since $v$ is not an interior vertex, by definition it
+must be a leaf. Thus $B$ is partially satisfied, which in turn satisfies one of
+the postrequisites as $v$ is returned. The second postrequisite, and second
+part of $B$ - that $T$ has not been modified - is ensured by satisfying $D$ at
+the end of every execution of the loop body, or $A$ if there is only one vertex
+in $T$. Thus $A \Rightarrow B$ over execution of the findLeaf function.
+
+The above is sufficient to prove that the satisfaction of the preconditions
+prior to findLeaf execution implies the satisfaction of the postconditions
+after findLeaf execution. Since termination has not been proven, findLeaf has
+only been shown to be partially correct.
+
+\section{Termination of FindLeaf}
+
+The following assumes that a binary tree consists of a finite number of
+vertices.
+
+Assume that findLeaf is executed on valid input whereby the precondition is
+satisfied. Observe that instructions 1 and 6 are guaranteed to execute only
+once, as they are not contained within the body of a loop. They may therefore
+be disregarded when proving termination, and only the loop (instructions 2
+through 5) considered.
+
+A fundamental property of binary trees is depth, which is the number of edges
+on the longest path from the root to any leaf in $T$. The depth of the root
+is therefore zero. For any interior vertex $v$ of $T$, setting $v:=v.left$ or
+$v:=v.right$ increases the depth of $v$ by one, as it adds an additional edge
+to traverse to reach the root.
+
+In question 1 it was proved that after every execution of the loop
+body on valid input, the depth of $v$ was increased by one. Define a new
+function $D$, whereby if $D(v)$ is computed for some $v \in T$, $D$ returns the
+depth of $v$ in $T$, and if $D(T)$ is computed for some binary tree $T$, $D$
+returns the depth of $T$. Thus after every execution of the loop body, where
+$v'$ is the value of $v$ before execution, $D(v'):=D(v')+1=D(v)$.
+
+Define another function $B(T,v) = D(T) - D(v)$, called the bound function. Since
+$D(v)$ increases by one every time the loop body executes and $D(T)$ remains
+constant (due to the condition of $T$ not being modified), $|B|$ decreases in
+value with every execution of the loop body. Because the size of $T$ is finite,
+$D(T)$ is finite as well, and so the loop body will execute only a finite
+number of times before $B(T,v) = 0$ - at this point, $D(v) = D(T)$, and so $v$
+must be a leaf node of $T$, as otherwise $v$ possesses a child with depth
+greater than the depth of the tree, by definition impossible. Since $v$ is not
+an interior vertex of $T$, the loop invariant is not satisfied and so the loop
+will terminate when $B(T,v) = 0$ after a finite number of executions.
+
+Thus it has been shown that the loop body will execute only a finite number of
+times on valid input, and so findLeaf will terminate on valid input.
+
+\section{Upper Bound on Cost of FindLeaf}
+
+As in question 2, observe that on valid input steps 1 and 6 are executed only
+once, for a total constant cost of 2. Also observe that the depth of $T$ is
+maximized when every vertex in $T$ counts toward the depth of $T$ - that is,
+when $T$ is in a configuration resembling a linked list with each vertex having
+exactly one parent and one child except for the root (which lacks a parent) and
+the leaf (which lacks a child). It will be in this case then that the bound
+function defined in question 2 is initialized to a value furthest from zero.
+
+The configuration described above will result in $T$ having a depth of
+$|T|-1$, where $|T|$ is the number of vertices in $T$, also known as the size of
+$T$. Since the depth of the root node is zero, $B$ is initialized to the value
+of $|T|-1$, which is also the number of times the loop runs as $B$
+decreases by exactly one with every execution of the loop body.
+
+Inside the loop, three instructions will be executed every time it is run - the
+initial check to see if the loop invariant is satisfied, a check whether the
+vertex has a left child, and the assignment of the vertex reference to either
+its left or right child depending on the outcome of this check. Thus the number
+of instructions executed before the loop terminates will be $3*n$, where $n$ is
+the number of times the loop executes.
+
+Assembling these observations, the worst case running time of findLeaf may be
+given by $R_U(s) = 3(s-1)+2 = 3s-1$, where $s=|T|$.
+
+\section{Lower Bound on Cost of FindLeaf}
+
+Steps 1 and 6 are executed exactly once, resulting in a cost of 2.
+Since the number of other instructions executed has been proven to
+be a function of the depth of the input, finding the binary tree
+configuration with the least depth per unit size will also result in
+a function for the lower bound on instruction executions in findLeaf.
+
+Logically, this configuration results when each depth level of $T$ is completely
+filled before putting a vertex on the next level - the binary tree cannot be
+compressed any further. The structure described is one that is as close to a
+full binary tree as possible. Since the capacity of each level is double the
+previous, the function that relates $|T|$ to $D(T)$ is given by
+$D(|T|)=fl(\log_2(|T|))$, where $fl$ is the flooring function that transforms
+any real number into the next lowest integer value.
+Following the same derivations as in question 3, we arrive at the best case
+running time of findLeaf given by $R_L(s)=3*fl(\log_2(s))+2$, where $s=|T|$.
+
+\section{The Action of the VertexCover Function}
+
+\textbf{Proof A:}
+
+By the action of vertexCover instruction either 6 or 7, the parent of the root
+of $T_L$ in $T$ is $w$. Due to instructions 12 or 13, there is no path leading
+from any vertex in $T_U$ to $w$, and thus no path leading from any vertex in
+$T_U$ to any vertex in $T_L$. Thus any vertex in $T_U$ is not a vertex in
+$T_L$, and vice versa - they are disjoint sets, with the addition that $u$ and
+$v$ are in neither.
+
+Since $v$ is defined to be a leaf, it has no children. The children of $w$ are
+$v$ and the root of $T_L$, which could be $null$. Thus the removal of $T_L \cup
+\{v\} \cup \{w\}$ from $T$ results in no lost vertices - all removed vertices
+are in $T_L \cup \{v\} \cup \{w\}$. $T_U$ may thus be written $T \setminus T_L
+\cup \{v\} \cup \{w\}$. Therefore $T_U$, $T_L$, $\{w\}$, and $\{v\}$ partition
+$T$.
+
+From the above it follows that every vertex of $T$ except $v$ and $w$ is a
+vertex of exactly one of $T_U$ or $T_L$, so that $|T| = |T_U| + |T_L| + 2$.
+
+\textbf{Proof B:}
+
+The basis for the proof of disjointness in part A was that after the execution
+of instructions 12 or 13, there is no path leading from any vertex in $T_U$ to
+$w$, and thus no path leading from any vertex in $T_U$ to any vertex in $T_L$.
+This may be modified slightly to prove something similar for edges in $T$.
+Observe that of all the edges in $T$, there are only three that join to at
+least one element outside of $T_U$ and $T_L$ - the edge from $x$ to $w$ (before
+removal), the edge from the root of $T_L$ to $w$, and the edge from $v$ to $w$.
+If these edges are disregarded, due to the partitioning nature of $T_U$ and
+$T_L$ and how edges by definition must join two vertices, all other edges must
+exist within $T_U$ or $T_L$.
+
+Thus it is true that every edge in $T$ is an edge in exactly one of $T_U$ or
+$T_L$, except for the edges that touch the vertex $w$.
+
+\section{Correctness of VertexCover}
+
+Prove: For all nonnegative integers $n = |T|$, $vertexCover(T)$ returns the
+correct output
+
+Base cases:
+
+If $|T|$ = 0 or $|T|$ = 1, then the vertex cover is the empty set, as
+there are no edges in $T$ to connect to the vertices in $T$.
+
+Strong Inductive Hypothesis:
+
+Assume the correct vertex cover is returned for $0...n$.
+Show $vertexCover(n+1)$ also holds:
+
+$vertexCover(n+1)$ splits $T$ up such that $|T| = |T_U| + |T_L|
++ 2$. Thus $|T_U| + |T_L| = |T|-2$, and so $|T_U| < |T|-2$ and $|T_U| < |T|-2$,
+so by inductive hypothesis $vertexCover(T_U)$ and $vertexCover(T_L)$ return the
+correct vertex cover of $T_U$ and $T_L$ respectively. Since $vertexCover(n+1) =
+vertexCover(T_U) \cup vertexCover(T_L) \cup \{w\}$, $vertexCover(n+1)$ also
+returns the correct vertexCover and so by the strong inductive hypothesis
+vertexCover is correct for all nonnevative integers $n = |T|$.
+
+\section{Worst-Case Cost of VertexCover}
+
+The worst case running time will result from the same circumstances as the
+worst case for findLeaf - that of a linked list configuration for $T$. Since
+this is a recursive function, it is best to consider instruction 15 and work
+from there.
+
+Step 15 specifies returning $vertexCover(T_U) \cup vertexCover(T_L) \cup
+\{w\}$. In the linked list configuration, $T_L$ will always be $null$, leading
+to a cost of 2 for calling $vertexCover(T_L)$ as only instructions 1 and 2 will
+be executed. The real cost lies in calling $vertexCover(T_U)$ - observe that by
+removing both the leaf node and its parent from $T$ upon every execution of the
+body of vertexCover, $|T_U| = |T|-2$. Since the precondition does not specify
+whether $|T|$ is even or odd, this necessitates two base cases:
+
+\begin{enumerate}
+\item if $s = 0$, $C(s) = 2$
+\item if $s = 1$, $C(s) = 2$
+\item otherwise $C(s) = R_U(s) + 11 + 2 + C(s-2)$
+\end{enumerate}
+
+In the above, $s$ is initialized to $|T|$, $R_U(s)$ is the cost function of the
+worst case for findLeaf defined back in question 3, and 11 is then number of
+instructions that will be executed during a single level of recursion in
+vertexCover, with 2 the number of instructions executed during the
+$vertexCover(T_L)$ call.
+
+\section{Upper Bound on Cost of VertexCover}
+
+If we consider the recurrence defined in the previous question, it's clear that
+there will be approximately $\frac{|T|}{2}$ levels of recursion. Consider the
+quantities $A = C(s)$ and $B = C(s-2)$. As the recurrence is defined, $A$ must
+be greater than or equal to $B$. Thus $A' = C(s) - C(s-2)$ is greater than or
+equal to $B' = C(s-2) - C(s-4)$, and so $\frac{|T|}{2}(C(s) - C(s-2)) \geq C(s)$
+for some large value of $s$, as $\frac{|T|}{2}(C(s) - C(s-2))$ may be viewed as
+replacing the number of operations performed by all $\frac{|T|}{2}$ levels of
+recursion with $C(s) - C(s-2)$, an increase over what they would have been.
+
+Observing the above, the upper bound of the recurrence may be written
+$\frac{|T|}{2}(R_U(s) + 13)$, which is of course linear in the product of the
+size of $T$ and the number of steps used by findLeaf in the worst case.
+
+\section{Lower Bound on Cost of VertexCover}
+
+Observing that the best-case running time will occur if $T$ is as close
+to a full binary tree as possible, using similar arguments to question 8 it is
+ascertained that the lower bound on the running time will be of the order
+$\frac{|T|}{2}(R_L(s) + C)$, where $C$ is some positive integer constant and
+$R_L(s)$ is the lower bound on the running time of findLeaf defined in question
+4. Thus the lower bound is also linear in the product of the size of $T$ and
+the number of steps used by findLeaf in the best case.
+
+\section{Bounds of VertexCover in Asymptotic Notation}
+
+The worst-case running time of vertexCover, as a function of the size of the
+input tree, $n$, is:
+
+\begin{equation}
+f(n) \in O(n^2)
+\end{equation}
+
+\end{document}

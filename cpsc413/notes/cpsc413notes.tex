@@ -1,0 +1,117 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 Notes}
+\author{Andrew Helwer}
+\date{Winter 2011}
+\maketitle
+
+\section{Correctness of Iterative Algorithms}
+
+\begin{itemize}
+\item Precondition: a list of conditions that input must satisfy to be valid
+\item Postcondition: a relationship between initial and final state
+\item Assertion: a condition that holds during a certain point in execution
+\item Loop Invariant: an assertion satisfied at the beginning of a loop
+\item Loop Variant: an assertion satisfied at the end of the loop
+\item Partial Correctness: precondition $\Rightarrow$ postcondition over the
+algorithm
+\item Bound Function $B$:
+\begin{itemize}
+\item Maps program variables to $\mathbb{Z}$
+\item Loop variant implies $|B|$ has decreased by at least one
+\item If $|B| \leq 0$ then the loop invariant is not satisfied
+\end{itemize}
+\item Termination: a bound function exists for every loop in the algorithm
+\item Correctness: a partially correct algorithm that terminates
+\end{itemize}
+
+\section{Correctness of Recursive Algorithms}
+
+\begin{itemize}
+\item Recursive algorithms are guaranteed to terminate by their nature
+\item Correctness of recursive algorithms is shown by structural induction
+\item Structural Induction:
+\begin{itemize}
+\item Show correctness to hold for all base cases
+\item Assume correctness for input of size $n$, then show for size $n+1$
+\end{itemize}
+\end{itemize}
+
+\section{Asymptotic Notation}
+
+\begin{itemize}
+\item $f(n) \in O(g(n))$: $f$ bounded above by $g$
+\item $f(n) \in \Omega (g(n))$: $f$ bounded below by $g$
+\item $f(n) \in \Theta (g(n))$: $f$ bounded above and below by $g$
+\end{itemize}
+
+\section{Greedy Algorithms}
+
+\begin{itemize}
+\item Greedy Choice Property: optimal solution includes locally optimal choice
+\item Greedy Algorithm: solves a problem exhibiting the greedy choice property
+\item Greedy algorithms are the fastest-running solutions to a problem
+\item Correctness of greedy algorithms is shown thus:
+\begin{enumerate}
+\item Prove correct output always exists given valid input
+\item Describe how to solve trivial instances
+\item Describe a greedy strategy involving a greedy choice
+\item Prove some correct output includes the greedy choice
+\item Prove adding the greedy choice to correct output gives correct output
+\item Describe a recursive algorithm implementation
+\item Prove correctness of the algorithm using structural induction
+\end{enumerate}
+\item Most early steps merely serve to simplify the structual induction step
+\end{itemize}
+
+\section{Divide-and-Conquer Algorithms}
+
+\begin{itemize}
+\item Problems are broken down into multiple problems of the same type
+\item Once the problems become small enough, they are solved efficiently
+\item The solved subproblems are then combined to form a total solution
+\item Correctness of divide-and-conquer algorithms is shown thus:
+\begin{enumerate}
+\item Describe trivial instances and how to solve them
+\item Describe how sub-instances should be formed from nontrivial ones
+\item Describe how a solution is formed from sub-instance solutions
+\item Describe a recursive algorithm implementation
+\item Prove correctness of the algorithm using structural induction
+\end{enumerate}
+\end{itemize}
+
+\section{The Master Theorem}
+
+\begin{itemize}
+\item The master theorem allows bounds to easily be placed on recurrences
+\item The theorem is defined as follows:
+
+Let $a \geq 1$ and $b > 1$ be constants, $f(n)$ be a function, and let $T(n)$
+be defined over the nonnegative integers by the recurrence:
+
+\begin{equation*}
+T(n) = aT \left( \frac{n}{b} \right) +f(n)
+\end{equation*}
+
+Then $T(n)$ may be bounded asymptotically as follows based on $f(n)$:
+
+\begin{itemize}
+\item If $f(n) = O(n^{\log_ba-\epsilon})$ for some $\epsilon > 0$, then $T(n) =
+\Theta(n^{\log_ba})$
+\item If $f(n) = \Theta(n^{\log_ba})$ then $T(n) = \Theta(n^{\log_ba}\log n)$
+\item $f(n) = \Omega(n^{\log_ba+\epsilon})$ for some $\epsilon > 0$ and
+$af(n/b) \leq cf(n)$ for some constant $c<1$ and all sufficiently large $n$,
+then $T(n) = \Theta(f(n))$
+\end{itemize}
+
+
+\end{itemize}
+
+\end{document}

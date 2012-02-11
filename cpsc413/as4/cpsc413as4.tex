@@ -1,0 +1,301 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{algorithmic}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 \\ Assignment 4 - Dynamic Programming}
+\author{Andrew Helwer}
+\date{March 2011}
+\maketitle
+
+\section{Design a Divide and Conquer Algorithm}
+
+Define a function $\omega:v \rightarrow \mathbb{R}$ which returns the real
+weight of any vertex $v$.
+
+Define a function $\alpha:S \rightarrow \mathbb{R}$, which for
+any set of vertices $S$ has the following action:
+\begin{equation*}
+\alpha(S) = \sum_{v \in S} \omega(v)
+\end{equation*}
+
+Within this document, the term \textit{minimal vertex cover} will be synonymous
+with a vertex cover $V \subset T$ such that for any vertex cover $V'
+\subset T$, $\alpha(V) < \alpha(V')$.
+
+$\{nil\} \cup S = S$ for any set $S$, where $nil$ is the value of $v.left$ or
+$v.right$ if $v$ does not have a left or right child.
+
+\textbf{1) Describe how to solve trivial instances:}
+
+One trivial instance of this problem occurs when $|T| = 0$, that is when
+$cover(nil)$ is called. $\emptyset$ should be returned in this instance.
+
+The other trivial instance occurs when $|T| = 1$. $\emptyset$
+will be returned, as a graph with a single vertex $v$ has no edges and thus the
+vertex cover will either be $v$ or $\emptyset$. Since $\alpha(\{v\}) > 0$ and
+$\alpha(\emptyset) = 0$, $\alpha(\emptyset) < \alpha(\{v\})$ and so $\emptyset$
+is the vertex cover with minimal $\alpha$.
+
+\textbf{2) Describe how sub-instances should be formed from nontrivial ones:}
+
+Define the function $\pi(v)$ for any $v \in T$, where:
+\begin{displaymath}
+\pi(v) = \left\{
+	\begin{array}{lr}
+	\emptyset & : v = nil \\
+	\{cover(v.left) \cup cover(v.right)\} & : v \neq nil
+	\end{array}
+	\right.
+\end{displaymath} 
+Consider the case of a tree $T$ of arbitrary size. Given the root of $T$, $v$,
+split the problem as follows:
+\begin{equation*}
+S_1 := \{v\} \cup \pi(v)
+\end{equation*}
+\begin{equation*}
+S_2 := \{v.left\} \cup \{v.right\} \cup \pi(v.left) \cup \pi(v.right)
+\end{equation*}
+This will find the minimal vertex cover that includes $v$, $S_1$, and the
+minimal vertex cover that does not include $v$, $S_2$.
+
+\textbf{3) Describe how a solution is formed from sub-instance solutions:}
+
+The set of $V$ of all vertex covers for $T$ may be partitioned into two
+subsets, where the root of $T$ is $v$:
+\begin{itemize}
+\item The set $V_1$ of all vertex covers for $T$ that include $v$
+\item The set $V_2$ of all vertex covers for $T$ that do not include $v$
+\end{itemize}
+Since $V_1 \sqcup V_2 = V$, the minimal element of $V$ may be found by taking
+the lesser of the minimal element in $V_1$ and the minimal element in $V_2$.
+Since the minimal element in $V_1$ is $S_1$ and the minimal element in $V_2$ is
+$S_2$, if $\alpha(S_1) \leq \alpha(S_2)$, the minimal element of $V$ will be
+$S_1$. Otherwise, it will be $S_2$. So $cover(v)$ should return $S_1$ if
+$\alpha(S_1) \leq \alpha(S_2)$ and $S_2$ otherwise.
+
+\textbf{4) Describe a recursive algorithm implementation:}
+
+$cover(v)$
+\begin{algorithmic}[1]
+\IF {($v.left=nil$ and $v.right=nil$) or $v=nil$}
+	\RETURN $\emptyset$
+\ELSE
+	\STATE $S_1\gets\{v\}\cup\pi(v)$
+	\STATE $S_2\gets\{v.left\}\cup\{v.right\}\cup\pi(v.left)\cup\pi(v.right)$
+	\IF {$\alpha(S_1) \leq \alpha(S_2)$}
+		\RETURN $S_1$
+	\ELSE
+		\RETURN $S_2$
+	\ENDIF
+\ENDIF
+\end{algorithmic}
+
+\textbf{5) Prove correctness of the algorithm using induction:}
+
+Base Cases: $|S|=1$ and $|S|=0$
+
+In both cases, the If statement in Instruction 1 will evaluate to True, and so
+instruction 2 will be executed, returning $\emptyset$ as was shown to be
+correct in Part 1. Thus the Base Cases hold.
+
+Inductive Case:
+
+Inductive Hypothesis - assume $cover(v)$ is correct for the root $v$ of all
+trees $T$ of size greater than 1 to $n$. Consider the case where $|T|=n+1$, $v$
+is the root of $T$, and $cover(v)$ is called:
+
+The If statement in Instruction 1 will evaluate to False, and so Instructions 4
+and 5 will be executed. These split the problem into sets $S_1$ and $S_2$ as
+was defined in Part 2. Since all recursive calls of $cover(u)$ will have $u$ as
+one of $v.left$, $v.right$, $v.left.left$, $v.left.right$, $v.right.left$, or
+$v.right.right$, the tree for which $u$ is the root is guaranteed to be of size
+less than or equal to $n$. Thus $cover(u)$ will return correct output by the
+Inductive Hypothesis, and so the values of $S_1$ and $S_2$ will be the minimal
+elements of $V_1$ and $V_2$. As was proved in Part 3, whichever of $S_1$ and
+$S_2$ have the smaller value of $\alpha$ will be the minimal vertex cover of
+$T$, which will be decided by Instructions 6, 7, and 9. Therefore $cover(v)$
+returns correct output.
+
+Thus the correctness of $cover(v)$ has been proved by induction. $\square$
+
+\section{Design a Dynamic Programming Algorithm}
+
+\textbf{6) Identify smaller instances that must be solved in nontrivial cases:}
+
+Using the same procedure as in the Divide and Conquer algorithm, for a tree $T$
+with root $v$, in order for $cover(v)$ to be solved we must know the minimal
+vertex covers for the subtrees of $T$ for which the following are roots:
+\begin{itemize}
+\item $v.left$
+\item $v.right$
+\item $v.left.left$
+\item $v.left.right$
+\item $v.right.left$
+\item $v.right.right$
+\end{itemize}
+
+\textbf{7) Identify an ordering on these smaller instances:}
+
+Since we may represent instances of the problem as vertices in $T$ upon which
+$cover(v)$ is called, for any $u,w \in T$, $u<w$ if and only if $u$ is visited
+before $w$ during a Postorder Traversal of $T$. This traversal is defined using
+the following function, with $v$ the root of $T$:
+
+$postorder(v)$
+\begin{algorithmic}[1]
+\IF {$v.left \neq nil$}
+	\STATE $postorder(v.left)$
+\ENDIF
+\IF {$v.right \neq nil$}
+	\STATE $postorder(v.right)$
+\ENDIF
+\STATE visit $v$ and return
+\end{algorithmic}
+
+Claim 7.1: For any $v \in T$, if $postorder(v)$ recursively calls
+$postorder(v.left)$ or $postorder(v.right)$, then $v.left$ and $v.right$ will
+be visited before $v$.
+
+Proof: This follows from the structure of the algorithm above; if
+$postorder(v.left)$ is called from Instruction 2 inside $postorder(v)$, then no
+other instructions in $postorder(v)$ may be executed until $postorder(v.left)$
+returns in Instruction 7, so $v.left$ will have been visited. So $v.left$ is
+visited before $v$. By symmetry, $v.right$ will be visited before $v$ as
+well, and so Claim 7.1 is true. $\square$
+
+Claim 7.2: For any vertex $v \in T$, all of the following are less than $v$ (if
+they exist):
+\begin{itemize}
+\item $v.left$
+\item $v.right$
+\item $v.left.left$
+\item $v.left.right$
+\item $v.right.left$
+\item $v.right.right$
+\end{itemize}
+Proof: Consider a call to $postorder(v)$. If $v.left$ exists,
+$postorder(v.left)$ is immediately called, so $v.left$ is visited before $v$ by
+Claim 7.1, and equivalently $v.left < v$. By symmetry, $v.right < v$ as
+well. Inside the call to $postorder(v.left)$, if $v.left.left$ exists,
+$postorder(v.left.left)$ is called, so $v.left.left$ is visited before $v.left$
+by Claim 7.1, and equivalently $v.left.left < v.left$. Therefore by the
+transitive property of an order relation, $v.left.left < v$. The proof is
+symmetric for $v.left.right$, $v.right.left$, and $v.right.right$. Thus Claim
+7.2 is true. $\square$
+
+\textbf{8) Choose a data structure}
+
+The data structure of choice will be a hash table, $H$, so that for any $v \in
+T$, $H(v)$ returns the minimal vertex cover for the subtree of $T$ with $v$ as
+its root in $O(1)$ time. $H(nil)$ will return $\emptyset$.
+
+\textbf{9) Describe a dynamic programming implementation:}
+
+First redefine the function $\pi(v)$ from above:
+\begin{displaymath}
+\pi(v) = \left\{
+	\begin{array}{lr}
+	\emptyset & : v = nil \\
+	\{H(v.left) \cup H(v.right)\} & : v \neq nil
+	\end{array}
+	\right.
+\end{displaymath}
+
+$cover(v)$
+\begin{algorithmic}[1]
+\IF {$v.left \neq nil$}
+	\STATE $cover(v.left)$
+\ENDIF
+\IF {$v.right \neq nil$}
+	\STATE $cover(v.right)$
+\ENDIF
+\IF {$v.left = nil$ and $v.right = nil$}
+	\STATE $H(v) \gets \emptyset$
+\ELSE
+	\STATE $S_1\gets\{v\}\cup\pi(v)$
+	\STATE $S_2\gets\{v.left\}\cup\{v.right\}\cup\pi(v.left)\cup\pi(v.right)$
+	\IF {$\alpha(S_1) \leq \alpha(S_2)$}
+		\STATE $H(v) \gets S_1$
+	\ELSE
+		\STATE $H(v) \gets S_2$
+	\ENDIF
+\ENDIF
+\RETURN $H(v)$
+\end{algorithmic}
+
+\textbf{10) Prove correctness of the algorithm using induction:}
+
+Note that $cover(v)$ is simply a modified version of $postcover(v)$, with the
+visit and return instruction replaced by a number of other instructions.
+
+Base Case:
+
+If $cover(v)$ is called where $v$ is the only vertex in its tree, then both
+Instructions 1 and 4 will not be satisfied but Instruction 7 will be, so
+Instruction 8 will be executed and $H(v)$ set to $\emptyset$, as it should be.
+Thus the Base Case holds.
+
+Inductive Step:
+
+Inductive Hypothesis - assume $cover(v)$ is correct for the root $v$ of all
+trees $T$ of size greater than 1 to $n$. Consider the case where $|T|=n+1$, $v$
+is the root of $T$, and $cover(v)$ is called:
+
+At least one of Instructions 1 and 4 will be satisfied, so $cover(v.left)$
+or $cover(v.right)$ will be called, and since the subtree of $T$ for which
+$v.left$ or $v.right$ is a root is guaranteed to be of size at most $n$, by the
+Inductive Hypothesis $cover(v.left)$ and $cover(v.right)$ will be correct.
+Instruction 7 will not be satisfied, so Instructions 10 and 11 will be executed.
+By Claim 7.2, all of the vertices
+required to form sets $S_1$ and $S_2$ will have been visited, and by the
+Inductive Hypothesis their values in the hash table $K$ will be correct, so
+the values of $S_1$ and $S_2$ will be the minimal elements of $V_1$ and $V_2$.
+As
+was proved in Part 3, whichever of $S_1$ and $S_2$ have the smaller value of
+$\alpha$ will be the minimal vertex cover of $T$, which will be decided by
+Instructions 12, 13, and 15. So $H(v)$ will contain the minimal vertex cover of
+$T$, which is returned in Instruction 18. Therefore $cover(v)$ returns correct
+output.
+
+Thus the correctness of $cover(v)$ has been proved by induction. $\square$
+
+\textbf{11) Define a bounding recurrence relation}
+
+Analysis of $cover(v)$ will be simplified if we first perform some analysis of
+$postorder(v)$. Observe that in the worst case, five instructions will be
+executed on a single level of recursion in $postcover(v)$, two of which are
+recursive calls. As this is a traversal, each vertex will be visited exactly
+once, so Instruction 7 will be executed exactly $|V|$ times on different levels
+of recursion. We may therefore bound the number of instructions executed by
+$postorder(v)$ on a tree of size $n$ as follows:
+\begin{equation*}
+T(n) \leq 5n
+\end{equation*}
+In order to convert this equation into a form useful for analysis of
+$cover(v)$, define the number of instructions necessary to visit a vertex as
+the variable $c$. So:
+\begin{equation*}
+T(n) \leq 4n + cn
+\end{equation*}
+As was noted in the proof of correctness, $cover(v)$ is simply a modified
+version of $postorder(v)$ whereby the visit instruction is replaced with a
+number of operations. Looking at $cover(v)$, we see in the worst case there will
+be six instructions executed when visiting a vertex, for example Instructions
+7, 10, 11, 12, 15, and 18. So, we can set $c=6$ in the above equation to bound
+the number of instructions executed by $cover(v)$ on a tree of size $n$:
+\begin{equation*}
+T(n) \leq 4n + 6n
+\end{equation*}
+\begin{equation*}
+T(n) \leq 10n
+\end{equation*}
+Thus $T(n)$ is of order $n$, and so $cover(v)$ runs in $O(n)$ time.
+
+\end{document}

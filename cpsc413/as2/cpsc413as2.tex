@@ -1,0 +1,247 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 \\ Assignment 2 - Greedy Algorithms}
+\author{Andrew Helwer}
+\date{February 2011}
+\maketitle
+
+\section{Show That a Feasible Output Always Exists}
+
+Given a set of inputs $I=\{h_1,h_2,\ldots,h_n\}$ such that $0 \leq h_1 < h_2 <
+\ldots < h_n$ where $h_1,h_2,\ldots,h_n \in \mathbb{R}$, show there exists a
+set of outputs $O=\{b_1,b_2,\ldots,b_n\}$ such that $0 \leq b_1 < b_2 <
+\ldots < b_n$ where $b_1,b_2,\ldots,b_n \in \mathbb{R}$ and $\forall \: h \in
+I$, $\exists \: b \in O$ such that $|h - b| \leq 4$.
+
+Consider the set of outputs $O$ where $\forall \: b_i \in O$ and $\forall \:
+h_j \in I$ where $0 \leq i = j \leq n$, $b_i = h_j$. Then since $0 \leq h_1 <
+h_2 < \ldots < h_n$, $0 \leq b_1 < b_2 < \ldots < b_n$, and since $b_i = h_j$,
+$|h_j-b_i|=0$, so $|h_j-b_i| \leq 4$. Thus a feasible output exists for any
+valid input. $\square$
+
+In more visual terms, a tower is placed on top of every house. Then since no two
+houses occupy the same position, no two towers occupy the same position. Since
+every house has a tower on top of it, the distance from any house to the nearest
+tower is zero.
+
+\section{Show That a Correct Output Always Exists}
+
+Define the output described in the first question to be the trivial solution. It
+was demonstrated that for every valid input of length $n$, the trivial solution
+is feasible and also of size $n$. So we can define an upper bound on the size
+of correct output:
+
+Given valid input of length $n$, assume that an output $o$ of length $m > n$
+is correct. Then $o$ is as small as possible. But there exists the trivial
+solution of length $n$, so $o$ is not as small as possible. Thus the size of
+correct output may equal but not exceed the size of valid input.
+
+The trivial solution is not always the correct solution. Consider the valid
+input $\{1,2\}$ of length 2 and the feasible output $\{1\}$ of length 1. Since
+an output of length less than the trivial solution exists, the trivial solution
+is not correct.
+
+Consider the set of all feasible outputs $F$ for some valid input of
+finite length $n$, and then consider $O \subset F$ where $O = \{o \in F :
+length(o) \leq n\}$. The trivial solution will be in $O$, so it will be
+nonempty. We can then define the nonempty set $S = \{s \in \mathbb{N} : s =
+length(o), o \in O\}$, which is composed of the unique lengths of $o \in O$.
+Thus $S$ is a nonempty subset of $\mathbb{N}$, and so by the Least Number
+Principle it has a
+smallest element, $s$. Therefore the correct output will be any of the $o \in O$
+such that $length(o) = s$, and so a correct output exists for any valid input.
+$\square$
+
+\section{Design and Prove Correctness of the Algorithm}
+
+\textbf{Describe How to Solve Trivial Instances}
+
+If the input set is empty, then the corresponding output set will also be empty
+as there are no houses to provide coverage for. If the input set is $\{h\}$ of
+size 1, then the correct output set will be $\{b\}$ where $h-4 \leq b \leq h+4$
+and $0 \leq b$ - the size of the output set must be at least one, as otherwise
+there will be no coverage at all, and a single tower may provide coverage for
+the single house by being within range of it so it is the minimum and therefore
+correct solution.
+
+\textbf{Describe a Greedy Strategy}
+
+Given an input set, $I$, and an output set, $O$, the greedy strategy is to
+begin by picking the first (and therefore lowest) element of $I$, $h$, and set
+$O := O \cup \{h+4\}$.
+
+\textbf{Show That This Works - Correct Output Includes the Greedy Choice}
+
+Consider an instance of the problem with some valid input, $I$, of length $n$,
+where $n \geq 2$. Then there is a correct output of this instance that includes
+$h_1+4$, the greedy choice.
+
+Proof: 
+
+By question two, a correct output exists for this problem instance.
+
+Consider the given input set $I$. The first element of $I$ will be $h_1$, so
+using the greedy strategy we set the (currently empty) output set $O := O \cup
+\{h_1+4\}$. So since $|h_1 - (h_1+4)| \leq 4$, $h_1$ is covered.
+
+Observe that any correct output for this instance must contain some tower that
+covers $h_1$, by definition. Define this tower to be $b_1$. Since $\nexists \:
+h_i \in I$ where $h_i \leq h_1$, no benefit is conferred by $b_1$ being at any
+position other than $h_1+4$, as if $b_1 > h_1+4$ then $h_1$ will no longer be
+covered by $b_1$, and if $b_1 < h_1+4$ it provides coverage to some interval
+less than $h_1$, where no houses are located. Thus we can replace $b_1$ in the
+correct solution with $h_1+4$ without rendering it incorrect (this also holds
+if more than one tower covers $h_1$ - replacing either will do). Therefore there
+is a correct output of this instance that includes the greedy choice. $\square$
+
+Consider now the set $I':= \{h \in I : h > h_1+8\}$, which will
+include all houses not covered by the greedy choice and is guaranteed to be of
+size $\leq n-1$, as $h_1 \notin I'$. Then $I'$ is a valid input as it satisfies
+the precondition, and so by the above the correct output for $I'$ will include
+the greedy choice.
+
+After making the greedy choice for $I'$, we may append it to $O$, and every
+element of $O$ will be included in some correct output for $I$. Therefore we may
+solve the problem recursively by making the greedy choice, removing all covered
+houses, and making the greedy choice for the resulting subset until only the
+empty set is left.
+
+\textbf{Describe an Algorithm}
+
+Given a valid input set $I$ satisfying the precondition, where $h_1$ is the
+first element in $I$, and an empty set $O$:
+
+
+\textbf{$cover(I)$}
+\begin{enumerate}
+\item if $I = \emptyset$ then
+
+\item return $\emptyset$
+
+else
+
+\item $O := O \cup \{h_1 + 4\}$
+
+For $h \in I$:
+
+\item if $h \leq h_1+8$ then
+
+\item $I:= I \setminus \{h\}$
+
+else
+
+\item break
+
+\item return $O \cup cover(I)$
+\end{enumerate}
+
+\textbf{Proof of Correctness by Induction}
+
+Note that the loop is guaranteed to halt as the input is of finite size.
+
+Notation: $I$ is the input set satisfying the precondition, $h_1$ is the first
+element of $I$
+
+$P(n)$: $cover(I)$ is correct, for every $size(I) \in \mathbb{N}$
+
+Base Case:
+
+If $I = \emptyset$, then $cover(I) = \emptyset$ by instruction 1 evaluating to
+True, which causes insstruction 2 to execute and return $\emptyset$. Then the
+base case is correct, as no towers need to be placed if there are no houses to
+be covered.
+
+Strong Inductive Hypothesis:
+
+Assume $P(n)$ to be correct for every input up to inputs of size $n$. Consider
+the case of input of size $n+1$:
+
+Upon execution of $cover(I)$ on $I$ where $size(I) = n+1$, $cover(I)$ returns
+$\{h_1+4\} \cup cover(I')$, where $size(I') < size(I)$, and so $cover(I')$
+returns the correct solution for $I'$ by the strong inductive hypothesis. As
+was proved above, the union of the greedy choice for $I$ with a correct
+solution for $I'$ will result in a correct solution for $I$. Thus $cover(I)$ is
+correct, for every $size(I) \in \mathbb{N}$. $\square$
+
+\section{Finding an Upper Bound on Running Time}
+
+Consider the algorithm specified above run on valid input. Define $T(n)$ to
+give the unit cost of running it on input of size $n$. Observe that if the size
+of the input is 0 - that is, $I = \emptyset$, only instructions 1 and 2 will be
+executed. Thus:
+
+\begin{equation*}
+T(0) = 2
+\end{equation*}
+
+For input of size 1, steps 1 and 3 will be executed, followed by the for
+loop test 4 - given the first (only, in this case) $h_1 \in I$, $h_1 \leq
+h_1+8$, so instruction 5 is then executed. Since there are no other elements of
+$I$, 7 will be executed, where $I = \emptyset$, so we have:
+
+\begin{equation*}
+T(1) = 5 + T(0) = 7
+\end{equation*}
+
+The pattern is easy to see. Given an input set $I$ of size $n$, if $k \leq n$
+elements are removed from $I$, then instruction 7 calls $cover(I)$ on the set
+$I$ of size $n-k$. The loop to remove $k$ elements from $I$ results in the
+execution of $2k+2$ instructions - just two instructions per element, plus
+another two to break from the loop! Using all this information, we may define a
+recurrence as follows, with $k$ some variable set by the nature of the input
+$I$:
+
+\begin{align*}
+&T(0) = 2 \\
+&T(n) = 3 + 2k + 2 + T(n-k)
+\end{align*}
+
+While correct, this is not very useful, as we wish $T(n)$ to be defined only in
+terms of $n$. It would be best to find some way of removing $k$. Luckily, then,
+when considering steps used by the algorithm in the worst case, it suffices to
+consider only the case in which a single element is removed from $I$. By
+setting $k=1$, we see that the amortized cost will be be 7 for a single level of
+recursion - far larger than the paltry 2 instructions required during batch
+removal from $I$. So, we may rewrite the recurrence thus:
+
+\begin{align*}
+&T(0) = 2 \\
+&T(n) = 7 + T(n-1)
+\end{align*} 
+
+Now that we have a working recurrence, finding an upper bound is in order. This
+is fairly simple - since $T(n-1)$ will be called on every level of recursion,
+there will be $n+1$ levels in total with the $(n+1)$th being the base case,
+which has cost 2. Since each non-base case level uses at least 7 instructions,
+we may present the upper bound thusly:
+
+\begin{equation*}
+T(n) \leq 7n + 2
+\end{equation*}
+
+So, we have:
+
+\begin{equation*}
+T(n) \in O(n)
+\end{equation*}
+
+Just for fun, let us also find a lower bound on the running time - this would
+occur when we set $k = n$, following from the same reasoning used to set $k=1$
+to find the upper bound. Then $T(n) = 2 + 2k + 2 + T(n-k)$, or $T(n) = 2n + 4 +
+T(0) = 2n + 6$. So, we have found $T(n) \geq 2n+6$.
+
+From this, we have:
+
+\begin{equation*}
+T(n) \in \Theta(n)
+\end{equation*}
+
+\end{document}

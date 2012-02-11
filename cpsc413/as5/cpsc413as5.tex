@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{algorithmic}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 \\ Assignment 5 - Complexity Theory}
+\author{Andrew Helwer}
+\date{April 2011}
+\maketitle
+
+The problem we are considering in this document is the proof that the Monotone Satisfiability with a Few True Variables Problem (M-SAT) is NP-Complete. For this, we will assume that our old friend the Minimal Vertex Cover Problem is NP-Complete, more specifically the version asking whether a graph includes a vertex cover of size at most $k$. This will be reverred to as V-COV. K-SAT is the NP-Complete satisfiability problem involving $k$ variables in each clause.
+
+\textbf{Encoding M-SAT}
+
+Suppose we have the abstract M-SAT problem $(x_1 \vee x_2) \wedge (x_2 \vee x_3)$ with some integer $k \geq 0$. Then the problem may be encoded as the string $k(1 \vee 2) \wedge (2 \vee 3)$ (the general encoding method may be inferred from this example). The encoding length is polynomial in the number of clauses, since given the size of the universe (number of unique variables) $|U|$, at most $|U|$ variables may be in any given clause by the definition of Conjuntive Normal Form. The efficient algorithm used for determining membership in the language of instances for K-SAT may be used here, with the additional condition that any strings including negations of variables will be rejected. The language of instances of M-SAT will be referred to as $\Sigma ^\ast _M$.
+
+\textbf{M-SAT $\in$ NP}
+
+A certificate for an instance of M-SAT including an encoding $x$ of a valid formula in Conjunctive Normal Form with no negations as well as an integer $k \geq 0$ would be a string encoding $y$ of a set of variables $S$ satisfying the following properties:
+
+\begin{itemize}
+\item $|S| \leq k$
+\item When the variables in $S$ are set as true in the formula, formula is satisfied.
+\end{itemize}
+
+We may specify a deterministic polynomial-time verification algorithm:
+
+\begin{algorithmic}[1]
+\IF {$x \notin \Sigma ^\ast _M$}
+	\STATE halt and reject
+\ENDIF
+\IF {$y$ encodes a set $S$ such that $|S| > k$}
+	\STATE halt and reject
+\ENDIF
+\IF {$y$ includes the encoding of some variable not used in $x$}
+	\STATE halt and reject
+\ENDIF
+\IF {the formula is not satisfied when all variables encoded by $y$ are true}
+	\STATE halt and reject
+\ENDIF
+\STATE accept certificate
+\end{algorithmic}
+
+Since we have an efficient algorithm for determining membership in $\Sigma ^\ast _M$, instruction 1 executes in polynomial time with respect to length of $x$. Instruction 4 also executes in polynomial time with respect to $x$ assuming a reasonable encoding used in $y$, and since $y$ is simply an encoding of a list of numbers such an encoding would exist. Instruction 7 would run in polynomial time, as it need only run a search over $x$ for occurrences of the variables in $y$. The algorithm run in Instruction 10 simply assigns truth values to a formula and evaluates it, a polynomial-time operation. Thus the entire algorithm will run in polynomial time with respect to the length of the certificate. As for correctness, all conditions necessary for the certificate to be verified (membership in language, satisfaction checking) will be satisfied.
+
+Thus M-SAT is in NP.
+
+\textbf{M-SAT $\in$ NP-Hard}
+
+Consider the NP-Complete problem V-COV. A vertex cover of a graph $G = (V,E)$ is a set of vertices $V' \subseteq V$ such that for every $(u,v) \in E$, at least one of $u$ or $v$ is in $V'$. Conveniently, that definition may be rephrased thus:
+
+Given $v_i, v_j, v_k, v_l, \ldots \in V$ and $(v_i, v_j), (v_k, v_l), \ldots \in E$, $V' \subseteq V$ is a vertex cover of $G$ if and only if the following formula is satisfied by setting every $v \in V'$ to true:
+
+\begin{equation*}
+(v_i \vee v_j) \wedge (v_k \vee v_l) \wedge \ldots
+\end{equation*}
+
+It is easy to see that this would be an instance of the M-SAT problem if we ask whether the formula may be satisfied with less than $k$ variables true. The formula will always be monotone as described.
+
+Claim: A polynomial-time many-one reduction exists from V-COV to M-SAT
+
+Proof: Consider a standard encoding of a graph $G = (V,E)$ and positive integer $k$, of length polynomial in $|V| + |E|$. This is an instance of V-COV. We may efficiently traverse the encoding of $E$, converting each pair $(u,v)$ into the clause $(u \vee v)$ and inserting $\wedge$ between them before prepending $k$, thus creating an instance of M-SAT in polynomial time. From the definition provided above of vertex cover, M-SAT would return true on this instance if and only if V-COV would return true on the original instance. Thus there exists a polynomial-time many-one reduction from V-COV to M-SAT.
+
+It follows from the claim that M-SAT is NP-Hard.
+
+Since M-SAT is in NP and M-SAT is NP-Hard, M-SAT is NP-Complete.
+
+\end{document}

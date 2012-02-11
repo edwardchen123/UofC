@@ -1,0 +1,394 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{algorithmic}
+\usepackage{xfrac}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 413 \\ Assignment 3 - Divide and Conquer}
+\author{Andrew Helwer}
+\date{March 2011}
+\maketitle
+
+\section{Bank Fraud Detection}
+
+This problem is simply a restatement of the majority element problem - given a
+collection of elements of size $n$, does there exist an element equivalent to
+more than $n/2$ elements of the collection? The obvious (and correct) algorithm
+is to simply check equality between all elements of the collection, but this
+requires $O(n^2)$ checks no matter how many heuristic optimizations are
+included.
+
+If a divide and conquer algorithm is employed, however, the algorithm becomes
+much faster - on the order of $O(n \log n)$, as we shall prove. An even faster
+algorithm exists using the Monte Carlo method, running in $O(n)$. 
+
+The name of the function implementing the algorithm will be $majElem(S)$, which
+returns $S' \subseteq S$ if a majority element exists. If $x \in S'$ then $x$ is
+equivalent to the majority element. If no majority element exists, $\emptyset$
+is returned. The answer to the original problem is Yes if a nonempty set is
+returned, and No otherwise.
+
+If two cards $a$ and $b$ are found equivalent using the card scanner, write $(a
+\sim b)$. Note that by the transitivity property of an equivalence relation, if
+$(a \sim b)$ and $(b \sim c)$, then $(a \sim c)$.
+
+\textbf{1) Describe how to solve trivial instances:}
+
+The trivial case occurs when $n=1$ - that is, there exists only a single element
+in the set. Clearly, that element is the majority element of its set. So
+$majElem(\{a\})$ returns $\{a\}$.
+
+\textbf{2) Describe how sub-instances should be formed from nontrivial ones:}
+
+Consider the case for an arbitrary set of elements, $S$, of size $n>1$. A
+sub-instance of the problem will be constructed by forming two sets $S_L$ and
+$S_R$ that partition $S$, where $|S_L| = \sfrac{n}{2}$ and $|S_R| = n - |S_L|$.
+The function will then recurse on $S_L$ and $S_R$ by calling $majElem(S_L)$ and
+$majElem(S_R)$.
+
+\textbf{3) Describe how a solution is formed from sub-instance solutions:}
+
+Claim 3.1: If $S$ contains a majority element $a$, then $a$ is a majority
+element in $S_L$ or $a$ is a majority element in $S_R$.
+
+Proof: Assume that $S$ contains a majority element $a$, where $|S|=n$. Then
+$a$ is equivalent to more than $\sfrac{n}{2}$ elements of $S$. If $S$ is
+partitioned into
+two disjoint sets $S_L$ and $S_R$, we have:
+\begin{equation}
+\label{eq:sumSize}
+|S_L|+|S_R|=n
+\end{equation}
+Since $S = S_L \sqcup S_R$, $a$ must be equivalent to more than $\sfrac{n}{2}$
+elements
+of $S_L \sqcup S_R$, so we have:
+\begin{equation}
+\label{eq:sumEquiv}
+|\{s \in S_L : a \sim s\}| + |\{s \in S_R : a \sim s\}| > \frac{n}{2}
+\end{equation}
+Without loss of generality, consider the case where $a$ is not a majority
+element of $S_L$. Then:
+\begin{align*}
+|\{s \in S_L : a \sim s\}| &\leq \frac{|S_L|}{2} \\
+|\{s \in S_L : a \sim s\}| - \frac{n}{2} &\leq \frac{|S_L|}{2} - \frac{n}{2} \\
+\frac{n}{2} - |\{s \in S_L : a \sim s\}| &\geq \frac{n}{2} - \frac{|S_L|}{2} \\
+|\{s \in S_R : a \sim s\}| &> \frac{n}{2} - \frac{|S_L|}{2}
+&\text{by eqn (\ref{eq:sumEquiv})} \\
+|\{s \in S_R : a \sim s\}| &> \frac{n}{2} - \frac{n-|S_R|}{2}
+&\text{by eqn (\ref{eq:sumSize})} \\
+|\{s \in S_R : a \sim s\}| &> \frac{|S_R|}{2}
+\end{align*}
+Therefore if $a$ is not a majority element of $S_L$ then $a$ must be a majority
+element of $S_R$. By symmetry, if $a$ is not a majority element of $S_R$ then
+$a$ must be a majority element of $S_L$. Thus we have proved Claim 3.1.
+$\square$
+
+Claim 3.2: If $majElem(S_L)$ returns the nonempty set $S_L' \subseteq S_L$,
+$majElem(S_R)$ returns $\emptyset$, and
+\begin{equation}
+\label{eq:notMaj}
+|S_L' \sqcup \{s \in S_R : a \sim s, a \in S_L'\}| \leq \frac{|S|}{2}
+\end{equation}
+then $S$ does not contain a majority element.
+
+Proof: Assume the antecedent. We wish to prove that $S$ then does not contain a
+majority element, so assume that $S$ does contain a majority element, $a$, where
+$|S|=n$. Then by Claim 3.1, $a$ is a majority element of $S_L$ or $a$ is a
+majority element of $S_R$. Since $S_R$ does not contain a majority element,
+$S_L$ must contain a majority element. As it is impossible for there to be two
+majority elements in a set, the majority element of $S_L$ must be $a$, where
+$a$ is equivalent to every element in $S_L'$. Note:
+\begin{align*}
+|\{s \in S_L : a \sim s\}| + |\{s \in S_R : a \sim s\}| &> \frac{n}{2}
+&\text{by eqn (\ref{eq:sumEquiv})} \\
+|S_L'| + |\{s \in S_R : a \sim s\}| &> \frac{n}{2} \\
+|S_L' \sqcup \{s \in S_R : a \sim s\}| &> \frac{n}{2}
+\end{align*}
+However, by equation ($\ref{eq:notMaj}$), this cannot be true, and so by
+contradiction $S$ must not contain a majority element. Thus we have proved
+Claim 3.2. $\square$
+
+Claim 3.3: If $majElem(S_L)$ returns the nonempty set $S_L' \subseteq S_L$,
+$majElem(S_R)$ returns the nonempty set $S_R' \subseteq S_R$, and
+\begin{align*}
+|S_L' \sqcup \{s \in S_R : a \sim s, a \in S_L'\}| &\leq \frac{|S|}{2} \\
+|S_R' \sqcup \{s \in S_L : a \sim s, a \in S_R'\}| &\leq \frac{|S|}{2}
+\end{align*}
+then $S$ does not contain a majority element.
+
+Proof: Assume the antecedent. We wish to prove that $S$ then does not contain a
+majority element, so assume that $S$ does contain a majority element, $a$, where
+$|S|=n$. Then by Claim 3.1, $a$ is a majority element of $S_L$ or $a$ is a
+majority element of $S_R$. So we have two cases:
+\begin{itemize}
+\item Case One: $a$ is a majority element of $S_L$. Then $a$ is equivalent
+to every element of $S_L'$, and this case is equivalent to the one considered
+in Claim 3.2, so a contradiction arises.
+\item Case Two: $a$ is a majority element of $S_R$. Then $a$ is equivalent
+to every element of $S_R'$, and this case is symmetric to the one considered
+in Claim 3.2, so a contradiction arises.
+\end{itemize}
+Since a contradiction results in every case when $S$ is assumed to contain a
+majority element, $S$ must not contain a majority element. Thus we have proved
+Claim 3.3. $\square$
+
+Upon recursing on $S_L$ and $S_R$, where $|S|=n$, there are four possible cases:
+
+\begin{enumerate}
+\item $majElem(S_L)$ returns $S_L'$ and $majElem(S_R)$ returns $\emptyset$
+
+Execute the following algorithm, for any $b \in S_L'$:
+\begin{algorithmic}
+\FOR {$a \in S_R$}
+	\IF {$(a \sim b)$}
+		\STATE $S_L' \gets S_L' \cup \{a\}$
+	\ENDIF
+\ENDFOR
+\end{algorithmic}
+If $|S_L'| > \sfrac{n}{2}$, then $S$ contains a majority element by definition,
+and since a set may only have one majority element $S_L'$ should be returned.
+If $|S_L'| \leq \sfrac{n}{2}$, then by Claim 3.2 no majority element exists in
+$S$, so $\emptyset$ should be returned.
+
+\item $majElem(S_L)$ returns $\emptyset$ and $majElem(S_R)$ returns $S_R'$
+
+This case is symmetric to case 1, with Claim 3.2 able to be used as the proof
+for it is also symmetric.
+
+\item $majElem(S_L)$ returns $S_L'$ and $majElem(S_R)$ returns $S_R'$
+
+Execute the following algorithm, for any $b \in S_L'$:
+\begin{algorithmic}
+\FOR {$a \in S_R$}
+	\IF {$(a \sim b)$}
+		\STATE $S_L' \gets S_L' \cup \{a\}$
+	\ENDIF
+\ENDFOR
+\end{algorithmic}
+If $|S_L'| > \sfrac{n}{2}$, then $S$ contains a majority element by definition,
+and since a set may only have one majority element $S_L'$ should be returned.
+If $|S_L'| \leq \sfrac{n}{2}$, then execute the following algorithm, for any $b
+\in S_R'$:
+\begin{algorithmic}
+\FOR {$a \in S_L$}
+	\IF {$(a \sim b)$}
+		\STATE $S_R' \gets S_R' \cup \{a\}$
+	\ENDIF
+\ENDFOR
+\end{algorithmic}
+If $|S_R'| > \sfrac{n}{2}$, then $S$ contains a majority element by definition,
+and since a set may only have one majority element $S_R'$ should be returned.
+If $|S_R'| \leq \sfrac{n}{2}$, then by Claim 3.3 no majority element exists in
+$S$, so $\emptyset$ should be returned.
+
+\item Both $majElem(S_L)$ and $majElem(S_R)$ return $\emptyset$
+
+By the converse of Claim 3.1, $S$ does not contain a majority element, and so
+$\emptyset$ should be returned.
+
+\end{enumerate}
+
+\textbf{4) Describe a recursive algorithm implementation:}
+
+$majElem(S)$
+\begin{algorithmic}[1]
+\IF {$|S|=1$} 
+	\RETURN $S$
+\ELSE 
+	\STATE Split $S$ into $S_L$ and $S_R$
+	\STATE $S_L' \gets majElem(S_L)$ and $S_R' \gets majElem(S_R)$
+	\IF {$S_L' \neq \emptyset$ and $S_R' = \emptyset$}
+		\STATE $S_L' \gets appendEq(S_L',S_R)$
+		\IF {$|S_L'| > \sfrac{|S|}{2}$}
+			\RETURN $S_L'$
+		\ELSE
+			\RETURN $\emptyset$
+		\ENDIF
+	\ELSIF {$S_L' = \emptyset$ and $S_R' \neq \emptyset$}
+		\STATE $S_R' \gets appendEq(S_R',S_L)$
+		\IF {$|S_R'| > \sfrac{|S|}{2}$}
+			\RETURN $S_R'$
+		\ELSE
+			\RETURN $\emptyset$
+		\ENDIF
+	\ELSIF {$S_L' \neq \emptyset$ and $S_R' \neq \emptyset$}
+		\STATE $S_L' \gets appendEq(S_L',S_R)$
+		\IF {$|S_L'| > \sfrac{|S|}{2}$}
+			\RETURN $S_L'$
+		\ELSE
+			\STATE $S_R' \gets appendEq(S_R',S_L)$
+			\IF {$|S_R'| > \sfrac{|S|}{2}$}
+				\RETURN $S_R'$
+			\ELSE
+				\RETURN $\emptyset$
+			\ENDIF
+		\ENDIF
+	\ELSE
+		\RETURN $\emptyset$
+	\ENDIF
+\ENDIF
+\end{algorithmic}
+
+$appendEq(S_1, S_2)$
+\begin{algorithmic}[1]
+\STATE $b \gets \text{any } s \in S_1$
+\FOR {$a \in S_2$}
+	\IF {$(a \sim b)$}
+		\STATE $S_1 \gets S_1 \cup \{a\}$
+	\ENDIF
+\ENDFOR
+\RETURN $S_1$
+\end{algorithmic}
+
+\textbf{5) Prove correctness of the algorithm using induction:}
+
+Base Case: Calling $majElem(\{a\})$ results in the If statement in instruction
+1 being satisfied, which causes instruction 2 to execute, which would return
+$\{a\}$. Thus the base case holds.
+
+Inductive Case:
+
+Inductive Hypothesis - assume $majElem(S)$ is correct for all sets of size
+greater than 1 to $n$. Consider the case where $|S| = n+1$:
+
+Instruction 1 will not be satisfied, so instruction 4 will be executed - this
+partitions $S$ into $S_L$ and $S_R$, where both $|S_L| \geq 1$ and $|S_R| \geq
+1$. Thus both $|S_L| \leq n$ and $|S_R| \leq n$, so in instruction 5
+$majElem(S_L)$ and $majElem(S_R)$ return correct output by the Inductive
+Hypothesis. The If statements in instructions 6, 13, 20, and 32 branch into the
+cases 1, 2, 3, and 4 (outlined in part 3 above) respectively, and implement the
+algorithms described for each case; the correctness of these algorithms was also
+proved in part 3 above, and so $majElem(S)$ returns correct output for case
+$|S|=n+1$.
+
+Thus correctness of $majElem(S)$ has been proved by induction. $\square$ 
+
+\textbf{6) Find and prove a recurrence for cost of the algorithm:}
+
+The recurrence in this case will not focus on the number of instructions
+executed; rather, the object of concern is the number of equivalence tests
+performed. The only point in the algorithm where an equivalence test is
+performed is in the sub-function $appendEq(S_1,S_2)$, which is called from
+instructions 7, 14, 21, and 25 in $majElem(S)$.
+
+Within $appendEq(S_1,S_2)$, an equivalence test is performed on every element of
+$S_2$ - thus it is performed $|S_2|$ times. If we look at every point
+$appendEq(S_1,S_2)$ is called from $majElem(S)$, we see it is in all cases
+called with the size of $S_2$ decided by instruction 4. The intention of
+instruction 4 is to split $S$ into $S_L$ and $S_R$ - two sets of nearly equal
+size, so the size of $S_2$ will be either $\lfloor \sfrac{|S|}{2} \rfloor$ or
+$\lceil \sfrac{|S|}{2} \rceil$.
+
+If the If statements on lines 20 and then 22 are not satisfied, we see that on a
+single level of recursion $appendEq(S_1,S_2)$ will be called twice - first with
+$S_2=S_R$ and then with $S_2=S_L$. Since $S_L$ and $S_R$ partition $S$, this
+means exactly $|S|$ equivalence tests will be performed per level of recursion
+in the worst case.
+
+$majElem(S)$ recurses on both $S_L$ and $S_R$, which if $|S|$ is even are of
+size exactly $\sfrac{|S|}{2}$. It suffices to consider only cases in which
+$|S|$ is even, as when $|S|$ is odd the number of equivalence tests performed
+will be bounded above by the number of tests performed on some set $S'$ where
+$|S'| = |S|+1$. Coupled with the observation that in the base case no
+equivalence tests are performed, we define the function $T(n)$, the number of
+equivalence tests performed on input of size $n$:
+
+\begin{displaymath}
+T(n) \leq \left\{
+	\begin{array}{lr}
+	0 & : n=1 \\
+	2T(\sfrac{n}{2}) + n & : n>1
+	\end{array}
+	\right.
+\end{displaymath} 
+
+\textbf{7) Use the recurrence to prove an upper bound on running time:}
+
+The Master Theorem allows us to easily bound recurrences of the following form:
+\begin{equation*}
+T(n) = a \; T\!\left(\frac{n}{b}\right) + f(n)  \;\;\;\; \mbox{where} \;\; a
+\geq 1 \mbox{, } b > 1
+\end{equation*}
+The recurrence we found is indeed of this form, so we may use the theorem.
+
+In our recurrence, $a=2$, $b=2$, and $f(n) = n$. First, we must show that $f(n)
+\in \Theta(n^{\log_ba})$:
+\begin{align*}
+f(n) &\in \Theta(n^{\log_ba}) \\
+n &\in \Theta(n^{\log_22}) \\
+n &\in \Theta(n)
+\end{align*}
+This is clearly true. Thus from the Master Theorem, we know the following:
+\begin{align*}
+E(n) &\in \Theta(n^{\log_ba}\log n) \\
+E(n) &\in \Theta(n^{\log_22}\log n) \\
+E(n) &\in \Theta(n \log n)
+\end{align*}
+So, $E(n) \in O(n \log n)$.
+
+\section{Minimal Vertex Cover}
+
+Building on the material covered in the handout on an efficient algorithm to
+calculate the minimal vertex cover of a graph,$^{[1]}$ we may consider an
+algorithm identical to the one outlined, but where specific conditions are
+placed on the vertex $v$ selected. The vertex $v$ selected for an input graph
+$G$ should be the vertex of highest order in that graph - that is, the vertex
+touching the most edges.
+
+If the highest-order vertex is of order one, then $G$ must consist only of
+disjoint pairs of vertices (vertices of order one) and vertices without any
+edges (vertices of order zero). $G$ would be very easy to find a minimal vertex
+cover for in this special case (simply pick one vertex in each disjoint pair),
+so the algorithm should detect this and correctly select the minimal vertex
+cover. Given the ease of computation in this case, it will not be considered for
+bounding the worst case above.
+
+If the highest-order vertex is of order two, then $G$ must consist only of
+$n\geq1$ disjoint subgraphs that are either a perfect cycle (so every vertex in
+that subgraph is exactly of order two) or a chain of vertices (so every vertex
+has order two except for the ends of the chain, which have order one). A minimal
+vertex cover is also simple to compute in this case using a greedy algorithm,
+which was produced in tutorial 6.
+
+If the highest-order vertex is of order three, the problem becomes vastly more
+complex. In this case, then, the algorithm defined in the minimal vertex cover
+handout will be used. However, since we need not worry about cases where only
+two or three vertices are removed when recursing the second time, we may
+rewrite the recurrence thus:
+\begin{displaymath}
+T(n) \leq \left\{
+	\begin{array}{lr}
+	2 & : n=0\text{ or }n=1 \\
+	T(n-1) + T(n-4) + cn^3 	& : n>1
+	\end{array}
+	\right.
+\end{displaymath}
+This has an associated characteristic polynomial:
+\begin{equation*}
+x^4 - x^3 - 1
+\end{equation*}
+This has only one real root - $\gamma \approx 1.38028$. Using the same reasoning
+as in the handout, we arrive at the following:
+\begin{equation*}
+T(n) \in O(\gamma^n)
+\end{equation*}
+Which of course is equivalent to saying given a graph $G(V,E)$, the algorithm
+runs in:
+\begin{equation*}
+O\left( \gamma^{|V|} \right)
+\end{equation*}
+
+\section{References}
+
+\begin{enumerate}
+\item Dr. Wayne Eberly, \textit{An Asymptotically Faster Algorithm for Vertex
+Cover}. CPSC 413, Winter 2011
+\end{enumerate}
+
+\end{document}
