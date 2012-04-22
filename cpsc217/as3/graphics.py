@@ -1,5 +1,5 @@
 #CPSC 217 Assignment 3
-#Andrew Helwer (10023875)
+#Andrew Helwer
 
 #The only source I used was Prof. Aycock's website for the command /
 #to change the screen size. Other than that this is all from scratch.
