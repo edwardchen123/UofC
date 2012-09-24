@@ -1,0 +1,35 @@
+CPSC 535 Assignment 1, Question 3 - Haar Wavelets
+Written Component
+
+Question One - The High Frequency Data
+
+The more decompositions have been performed on the image the more detail the high frequency
+data begins to show in image form. By the final decomposition the cat is clearly visible,
+although the dark parts in the high frequency image are light areas in the original.
+Interestingly, details not visible in the original image are visible in the high frequency
+image - the cat's eyes are easily seen. The range of the high frequency data is as follows:
+
+First decomposition - [-9.25, 8.75]
+Second decomposition - [-13.688, 13.438]
+Third decomposition - [-26.312, 22.906]
+
+As the range grows, features become more visible to the eye in the high frequency data. 
+
+Question Two - Image Compression
+
+For lossy image compression, performing Haar decomposition then throwing away the high
+frequency data appears to be a simple solution to halve the image's size while preserving
+main features. Alternatively, compression algorithms could be applied individually
+to the high and low frequency data, optimized for their differing characteristics. This
+could achieve better compression than using a single algorithm on the image as a whole,
+and once the high and low frequency data are decompressed they can be combined to recreate
+the original image.
+
+Question Three - Limits of Haar Decomposition
+
+There could eventually be an iteration of Haar decomposition after which the image is
+unusable for its intended purpose, by virtue of having too little data; the low frequency
+data has been reduced to the point where major features are thrown away as noise. However,
+it may be useful to continue decomposing to this point if interest is focused mostly on
+the noise itself, as more decompositions lead to more sensitive high frequency data.
+
