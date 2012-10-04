@@ -1,0 +1,9 @@
+import platform
+
+env = Environment()
+
+if platform.system() == 'Darwin':
+    env.MergeFlags('-framework OpenGL')
+    env.MergeFlags('-framework GLUT')
+#elif platform.system() == 'Linux':
+env.Program(target = 'TextureBMP', source = ['TextureBMP.cpp', 'RgbImage.cpp']) 
