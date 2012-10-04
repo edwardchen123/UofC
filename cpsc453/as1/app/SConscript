@@ -1,0 +1,6 @@
+import os
+Import('env')
+
+env.Prepend(LIBS = ['util'])
+env.Program(target = 'main', source = env.Glob(os.path.join('source', '*.cpp')))
+
