@@ -10,12 +10,16 @@ class RgbImage;
 class ImageManip {
 public:
     ImageManip(RgbImage& img);
-    void Quantize(int levels);
+    void Quantize(int bits);
     void ChangeBrightness(float s);
     void ChangeSaturation(float s);
     void ScaleImage();
     void RotateImage();
 private:
-    RgbImage& image;
+    unsigned long ImageElementCount();
+    unsigned int ImageElementSize();
+    unsigned long ImageByteCount();
+    char* CopyData();
+    RgbImage& m_image;
 };
 

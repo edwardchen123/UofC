@@ -1,4 +1,5 @@
 #include <util/rgb_image.hpp>
+#include <util/image_manip.hpp>
 
 #ifdef __APPLE__
     #include <GLUT/glut.h>
@@ -122,6 +123,15 @@ int main(int argc, char* argv[]) {
     glClearColor (0.0, 0.0, 0.0, 0.0); 
 	glShadeModel(GL_FLAT); 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Move bmp image into texture memory
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, img.GetNumCols(), img.GetNumRows(), 0,
+                    GL_RGB, GL_UNSIGNED_BYTE, img.ImageData());
 
     // Set initial texture properties improperly
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -129,12 +139,17 @@ int main(int argc, char* argv[]) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    // Move bmp image into texture memory
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3,img.GetNumCols(), img.GetNumRows(),
-                        GL_RGB, GL_UNSIGNED_BYTE, img.ImageData());
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, 3,img.GetNumCols(), img.GetNumRows(),
+     //                   GL_RGB, GLU_UNSIGNED_BYTE, img.ImageData());
 
     glutDisplayFunc(DrawScene);
     glutReshapeFunc(ResizeWindow);
+
+    ImageManip im (img);
+    im.ChangeBrightness(0.8f);
+    glutDisplayFunc(DrawScene);
+    std::cout << gluErrorString(glGetError()) << std::endl;
+
     glutKeyboardFunc(Keyboard);
     glutMainLoop();
     return 0;
