@@ -139,14 +139,11 @@ int main(int argc, char* argv[]) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    //gluBuild2DMipmaps(GL_TEXTURE_2D, 3,img.GetNumCols(), img.GetNumRows(),
-     //                   GL_RGB, GLU_UNSIGNED_BYTE, img.ImageData());
-
     glutDisplayFunc(DrawScene);
     glutReshapeFunc(ResizeWindow);
 
     ImageManip im (img);
-    im.ChangeBrightness(0.8f);
+    im.ChangeBrightness(0.5f);
     glutDisplayFunc(DrawScene);
     std::cout << gluErrorString(glGetError()) << std::endl;
 

@@ -1,0 +1,22 @@
+import platform
+from os.path import join
+
+env = Environment()
+
+sysName = platform.system()
+if sysName == 'Darwin':
+    env.MergeFlags('-framework OpenGL')
+    env.MergeFlags('-framework GLUT')
+elif sysName == 'Linux' or sysName == 'Windows':
+    env.Append(LIBS = ['opengl', 'glut'])
+else:
+    print 'ERROR: Unrecognized operating system'
+    quit()
+
+env.Append(CPPPATH = ['#'])
+
+buildDir = 'build'
+sourceDirs = ['util', 'app']
+for dir in sourceDirs:
+    env.SConscript(dirs=[dir], variant_dir=join(buildDir, dir), duplicate=0, exports='env')
+
