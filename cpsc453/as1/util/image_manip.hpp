@@ -19,7 +19,7 @@ private:
     unsigned long ImageElementCount();
     unsigned int ImageElementSize();
     unsigned long ImageByteCount();
-    char* CopyData();
+    unsigned char* CopyData();
     RgbImage& m_image;
 };
 

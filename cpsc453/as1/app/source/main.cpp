@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+ImageManip* manipulator;
+
 /* *
  * DisplayError
  *
@@ -97,6 +99,76 @@ void Keyboard (unsigned char key, int x, int y)
    }
 }
 
+enum FilterSelection {
+    quantize = 0,
+    brighten = 1,
+    saturate = 2,
+    scale = 3,
+    rotate = 4
+};
+
+void FilterMenu(int selection) {
+
+    switch (selection) {
+        case quantize:
+            {
+            std::cout << "Enter number of levels: ";
+            int levels = 0;
+            std::cin >> levels;
+            if (1 <= levels && levels <= 255)
+                manipulator->Quantize(levels);
+            else
+                std::cout << "ERROR: Levels must be between 1 and 255." << std::endl;
+            break;
+            }
+        case brighten:
+            {
+            std::cout << "Enter brightness scaling factor: ";
+            float s;
+            std::cin >> s;
+            if (0.0f <= s)
+                manipulator->ChangeBrightness(s);
+            else
+                std::cout << "ERROR: Factor must be positive." << std::endl;
+            break;
+            }
+        case saturate:
+            {
+            std::cout << "Enter saturation scaling factor: ";
+            float s;
+            std::cin >> s;
+            if (0.0f <= s)
+                manipulator->ChangeSaturation(s);
+            else
+                std::cout << "ERROR: Factor must be positive." << std::endl;
+            break;
+            }
+        case scale:
+            {
+            manipulator->ScaleImage();
+            break;
+            }
+        case rotate:
+            {
+            manipulator->RotateImage();
+            break;
+            }
+    }
+    glutDisplayFunc(DrawScene);
+    glutReshapeFunc(ResizeWindow);
+}
+
+void CreateFilterMenu() {
+    int filterMenu = glutCreateMenu(FilterMenu);
+    glutSetMenu(filterMenu);
+    glutAddMenuEntry("Quantize", quantize);
+    glutAddMenuEntry("Brighten", brighten);
+    glutAddMenuEntry("Saturate", saturate);
+    glutAddMenuEntry("Scale", scale);
+    glutAddMenuEntry("Rotate", rotate);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 int main(int argc, char* argv[]) {
     // Parse CL arguments
     glutInit(&argc, argv);
@@ -142,10 +214,19 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(DrawScene);
     glutReshapeFunc(ResizeWindow);
 
+    manipulator = new ImageManip(img);
+    manipulator->ChangeBrightness(1.5);
+    /*
     ImageManip im (img);
-    im.ChangeBrightness(0.5f);
+    im.ChangeBrightness(0.7f);
+    im.ChangeSaturation(0.3f);
+    im.ScaleImage();
+    */
     glutDisplayFunc(DrawScene);
+    glutReshapeFunc(ResizeWindow);
     std::cout << gluErrorString(glGetError()) << std::endl;
+
+    CreateFilterMenu();
 
     glutKeyboardFunc(Keyboard);
     glutMainLoop();

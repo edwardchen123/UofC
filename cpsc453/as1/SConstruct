@@ -8,7 +8,7 @@ if sysName == 'Darwin':
     env.MergeFlags('-framework OpenGL')
     env.MergeFlags('-framework GLUT')
 elif sysName == 'Linux' or sysName == 'Windows':
-    env.Append(LIBS = ['opengl', 'glut'])
+    env.Append(LIBS = ['GL', 'GLU', 'glut'])
 else:
     print 'ERROR: Unrecognized operating system'
     quit()
