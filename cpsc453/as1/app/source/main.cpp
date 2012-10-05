@@ -41,6 +41,11 @@ void DisplayError(int errorCode) {
     }
 }
 
+/* *
+ * DrawScene
+ *
+ * Draws current texture to screen. Taken from code given in tutorial.
+ * */
 void DrawScene()
 {
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -67,6 +72,12 @@ void DrawScene()
    glDisable(GL_TEXTURE_2D);
 }
 
+/* *
+ * ResizeWindow
+ *
+ * Resizes the window displaying the image appropriately.
+ * Taken from code given in tutorial.
+ * */
 void ResizeWindow(int w, int h)
 {
 	float viewWidth = 1.1;
@@ -88,6 +99,12 @@ void ResizeWindow(int w, int h)
 	glLoadIdentity();
 }
 
+/* *
+ * Keyboard
+ *
+ * Exits program when ESC key is pressed.
+ * Taken from code given in tutorial.
+ * */
 void Keyboard (unsigned char key, int x, int y)
 {
 	switch (key) {
@@ -99,6 +116,11 @@ void Keyboard (unsigned char key, int x, int y)
    }
 }
 
+/* *
+ * FilterSelection
+ *
+ * Enumerated list of filter options to choose from a menu.
+ * */
 enum FilterSelection {
     quantize = 0,
     brighten = 1,
@@ -107,8 +129,13 @@ enum FilterSelection {
     rotate = 4
 };
 
+/* *
+ * FilterMenu
+ *
+ * Called when user selects filter from menu.
+ * */
 void FilterMenu(int selection) {
-
+    unsigned char* data = 0;
     switch (selection) {
         case quantize:
             {
@@ -116,7 +143,7 @@ void FilterMenu(int selection) {
             int levels = 0;
             std::cin >> levels;
             if (1 <= levels && levels <= 255)
-                manipulator->Quantize(levels);
+                data = manipulator->Quantize(levels);
             else
                 std::cout << "ERROR: Levels must be between 1 and 255." << std::endl;
             break;
@@ -127,7 +154,7 @@ void FilterMenu(int selection) {
             float s;
             std::cin >> s;
             if (0.0f <= s)
-                manipulator->ChangeBrightness(s);
+                data = manipulator->ChangeBrightness(s);
             else
                 std::cout << "ERROR: Factor must be positive." << std::endl;
             break;
@@ -138,26 +165,45 @@ void FilterMenu(int selection) {
             float s;
             std::cin >> s;
             if (0.0f <= s)
-                manipulator->ChangeSaturation(s);
+                data = manipulator->ChangeSaturation(s);
             else
                 std::cout << "ERROR: Factor must be positive." << std::endl;
             break;
             }
         case scale:
             {
-            manipulator->ScaleImage();
+            data = manipulator->ScaleImage();
             break;
             }
         case rotate:
             {
-            manipulator->RotateImage();
+            data = manipulator->RotateImage();
             break;
             }
     }
-    glutDisplayFunc(DrawScene);
-    glutReshapeFunc(ResizeWindow);
+    glClearColor (0.0, 0.0, 0.0, 0.0); 
+	glShadeModel(GL_FLAT); 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+    GLuint textureID;
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, manipulator->ColCount(), 
+                        manipulator->RowCount(),
+                        GL_RGB, GL_UNSIGNED_BYTE, data);
+    if (data != 0) {
+        delete[] data;
+    }
 }
 
+/* *
+ * CreateFilterMenu
+ *
+ * Creates and initializes the menu of filters. Opens on right click.
+ * */
 void CreateFilterMenu() {
     int filterMenu = glutCreateMenu(FilterMenu);
     glutSetMenu(filterMenu);
@@ -169,6 +215,11 @@ void CreateFilterMenu() {
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
+/* *
+ * main
+ *
+ * Main program loop. Initializes program components.
+ * */
 int main(int argc, char* argv[]) {
     // Parse CL arguments
     glutInit(&argc, argv);
@@ -197,13 +248,14 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
+    // Registers texture
     GLuint textureID;
-    glGenTextures(1, &textureID);
+    glGenTextures(1, &textureID); // a bit of a hack
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Move bmp image into texture memory
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, img.GetNumCols(), img.GetNumRows(), 0,
-                    GL_RGB, GL_UNSIGNED_BYTE, img.ImageData());
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, img.GetNumCols(), img.GetNumRows(),
+                        GL_RGB, GL_UNSIGNED_BYTE, img.ImageData());
 
     // Set initial texture properties improperly
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -211,23 +263,17 @@ int main(int argc, char* argv[]) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glutDisplayFunc(DrawScene);
-    glutReshapeFunc(ResizeWindow);
-
+    // Initializes global variable manipulator
     manipulator = new ImageManip(img);
-    manipulator->ChangeBrightness(1.5);
     /*
-    ImageManip im (img);
-    im.ChangeBrightness(0.7f);
-    im.ChangeSaturation(0.3f);
-    im.ScaleImage();
-    */
-    glutDisplayFunc(DrawScene);
-    glutReshapeFunc(ResizeWindow);
-    std::cout << gluErrorString(glGetError()) << std::endl;
+    unsigned char* data = manipulator->Quantize(10);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, img.GetNumCols(), img.GetNumRows(),
+                        GL_RGB, GL_UNSIGNED_BYTE, data);
+                        */
 
     CreateFilterMenu();
-
+    glutDisplayFunc(DrawScene);
+    glutReshapeFunc(ResizeWindow);
     glutKeyboardFunc(Keyboard);
     glutMainLoop();
     return 0;
