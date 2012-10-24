@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{algorithmic}
+\usepackage{xfrac}
+
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{CPSC 511 \\ Assignment 1}
+\author{Andrew Helwer}
+\date{October 2012}
+\maketitle
+
+\section{Question 1}
+
+\textbf{1)}
+
+Show that if $L_1, L_2 \in DTIME(t(n))$ then $L_1 \cup L_2 \in DTIME(t(n))$.
+
+Proof:
+
+Let $M_1$ be a TM such that $M_1(x) = 1 \Leftrightarrow x \in L_1$ which runs in $DTIME(t(|x|))$, and let $M_2$ be a TM such that $M_2(y) = 1 \Leftrightarrow y \in L_2$ which runs in $DTIME(t(|y|))$. 
+$L_3 = L_1 \cup L_2$ is the set of input strings which are in $L_1$ or are in $L_2$.
+Consider a new TM, $M_3$.
+$M_3$ takes as input a description of $M_1$ concatenated with a description of $M_2$, followed by input $z$.
+$M_3$ simulates $M_1$ on $z$ to calculate $r_1 = M_1(z)$, which takes $t(|z|)*\log(t(|z|))$ time.
+$M_3$ then simulates $M_2$ on $z$ to calculate $r_2 = M_1(z)$, which also takes $t(|z|)*\log(t(|z|))$ time.
+$M_3(z) = r_1 \vee r_2$, which is computed in constant time $c$.
+$M_3$ accepts exactly $L_1 \cup L_2$, and does so in $2 \cdot t(|z|)*\log(t(|z|)) + c$ time.
+Thus if $L_1, L_2 \in DTIME(t(n))$ then $L_1 \cup L_2 \in DTIME(t(n))$.
+
+\end{document}
+
