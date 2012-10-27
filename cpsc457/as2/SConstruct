@@ -1,0 +1,6 @@
+env = Environment()
+
+env.MergeFlags('-pthread')
+
+env.Program(target = 'a.out', source = env.Glob('*.cpp'))
+
