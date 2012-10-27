@@ -14,8 +14,8 @@ File name: pc.cpp
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "task.hpp"
 #include "circular_buffer.hpp"
+#include "task.hpp"
 #include "con_comm.hpp"
 
 /* *
@@ -84,6 +84,9 @@ int main(int argc, char* argv[]) {
 		delete producers[i].first;
 	for (unsigned long i = 0; i < consumers.size(); ++i)
 		delete consumers[i].first;
+
+    std::cout << "Consumed " << itemCount*prodCount << " items of " 
+                << itemCount*prodCount << " produced items." << std::endl;
 
 	return 0;
 }

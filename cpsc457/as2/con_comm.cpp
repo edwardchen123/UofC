@@ -19,11 +19,13 @@ void ConComm::PrintOut(Task const& outT, CircularBuffer const& outB) {
     std::cout << std::endl;
     pthread_mutex_unlock(&m_outputMutex);
 }
-void ConComm::DebugPrintOut(char const* out) {
+
+void ConComm::PrintOut(std::stringstream const& ss) {
     pthread_mutex_lock(&m_outputMutex);
-    std::cout << out << std::endl;
+    std::cout << ss.str();
     pthread_mutex_unlock(&m_outputMutex);
 }
+
 bool ConComm::IsFinished() {
     bool finished = false;
     pthread_mutex_lock(&m_finishedMutex);
@@ -31,6 +33,7 @@ bool ConComm::IsFinished() {
     pthread_mutex_unlock(&m_finishedMutex);
     return finished;
 }
+
 void ConComm::MarkAsFinished() {
     pthread_mutex_lock(&m_finishedMutex);
     m_finished = true;

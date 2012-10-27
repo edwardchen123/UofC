@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pthread.h>
+#include <sstream>
 #include "task.hpp"
 #include "circular_buffer.hpp"
 
@@ -16,9 +17,13 @@ class ConComm {
 public:
 	ConComm(); 
 	~ConComm();
+    // Prints out state of given task and buffer
 	void PrintOut(Task const& outT, CircularBuffer const& outB);
-    void DebugPrintOut(char const* out);
+    // Prints out given stringstream
+    void PrintOut(std::stringstream const& ss);
+    // Returns whether producers have finished production
 	bool IsFinished();
+    // Mark that producers have finished production
 	void MarkAsFinished();
 private:
 	pthread_mutex_t m_outputMutex;

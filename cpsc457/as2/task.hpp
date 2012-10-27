@@ -14,10 +14,17 @@ class ConComm;
  * */
 class Task {
 public:
+    // Executes task
 	virtual void Execute() = 0;
+    // Prints status of task
 	virtual void PrintStatus() const = 0;
 };
 
+/* *
+ * Class Producer
+ *
+ * Ventilator class implementing Task interface. Produces items.
+ * */
 class Producer : public Task {
 public:
 	Producer(std::vector<CircularBuffer*> const& buffers, 
@@ -34,6 +41,11 @@ private:
 	unsigned long m_produced;
 };
 
+/* *
+ * Class Consumer
+ *
+ * Worker class implementing Task interface. Consumes items.
+ * */
 class Consumer : public Task {
 public:
 	Consumer(std::vector<CircularBuffer*> const& buffers, 

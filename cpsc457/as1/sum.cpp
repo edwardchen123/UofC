@@ -12,6 +12,7 @@ File name: sum.cpp
 #include <iostream>
 #include <cstdio>
 #include <pthread.h>
+#include <stdlib.h>
 
 // Collection of fields to be associated with each thread
 struct SumRangeArgs {

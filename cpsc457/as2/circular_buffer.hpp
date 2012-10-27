@@ -16,8 +16,11 @@ class CircularBuffer {
 public:
 	CircularBuffer(unsigned long buffSize, unsigned long id, ConComm& comm);
 	~CircularBuffer();
+    // Puts given item in buffer if it is not full.
 	bool PutIfNotFull(int item, Task const& t);
+    // Returns next item from buffer if it is not empty.
 	bool GetIfNotEmpty(int& item, Task const& t);
+    // Prints status of buffer.
     void PrintStatus() const;
 private:
 	unsigned long m_front;
