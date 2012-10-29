@@ -15,23 +15,44 @@
 \date{October 2012}
 \maketitle
 
-\section{Question 1}
+\section{Question 1 - Closure Under Union}
 
 \textbf{1)}
-
-Show that if $L_1, L_2 \in DTIME(t(n))$ then $L_1 \cup L_2 \in DTIME(t(n))$.
-
-Proof:
 
 Let $M_1$ be a TM such that $M_1(x) = 1 \Leftrightarrow x \in L_1$ which runs in $DTIME(t(|x|))$, and let $M_2$ be a TM such that $M_2(y) = 1 \Leftrightarrow y \in L_2$ which runs in $DTIME(t(|y|))$. 
 $L_3 = L_1 \cup L_2$ is the set of input strings which are in $L_1$ or are in $L_2$.
 Consider a new TM, $M_3$.
-$M_3$ takes as input a description of $M_1$ concatenated with a description of $M_2$, followed by input $z$.
-$M_3$ simulates $M_1$ on $z$ to calculate $r_1 = M_1(z)$, which takes $t(|z|)*\log(t(|z|))$ time.
-$M_3$ then simulates $M_2$ on $z$ to calculate $r_2 = M_1(z)$, which also takes $t(|z|)*\log(t(|z|))$ time.
-$M_3(z) = r_1 \vee r_2$, which is computed in constant time $c$.
-$M_3$ accepts exactly $L_1 \cup L_2$, and does so in $2 \cdot t(|z|)*\log(t(|z|)) + c$ time.
+The first stage of $M_3$ is identical to $M_1$.
+So, on input $z$, $M_3$ calculates $r_1 = M_1(z)$, in $DTIME(t(|z|))$.
+Next, $M_3$ runs $z$ on its second stage, which is identical to $M_2$.
+So, $M_3$ calculates $r_2 = M_2(z)$ in $DTIME(t(|z|))$.
+If $r_1 \vee r_2 = 1$, $M_3$ prints 1 to the output tape and halts.
+If $r_1 \vee r_2 = 0$, $M_3$ prints 0 to the output tape and halts.
+$M_3$ determines membership in $L_1 \cup L_2$ in $2 \cdot t(n)$ time, so in $DTIME(t(n))$.
 Thus if $L_1, L_2 \in DTIME(t(n))$ then $L_1 \cup L_2 \in DTIME(t(n))$.
+
+\textbf{2)}
+
+Consider as a counterexample languages $L_1 = \{0, 1\}$ and $L_2 = \{x \in \{0\}^*\}$. 
+Then $L_1 \in DTIME(c), c \in \mathbb{N}$ and $L_2 \in DTIME(|X|)$ for input $x$. 
+The TM accepting $L_1 \cup L_2$ would have to read $x$ to determine its inclusion in $L_2$, which takes at least $|x|$ steps. 
+Thus $L_1 \cup L_2 \not \in DTIME(min(t_1, t_2))$ since $min(t_1, t_2)$ is $c$.
+
+\section{Question 2 - OMPL and Logarithmic Space}
+
+The only rule which cannot be described using only states and transitions (with no additional workspace used) is $O$.
+The rule $O$ requires the use of two counters, $c_1$ and $c_2$.
+$c_1$ increments every time the read head on the input finds an $<outline>$ character.
+$c_2$ increments every time the read head on the input finds an $<outline/>$ character.
+If an $</outline>$ character is read, the input is immediately rejected unless $c_1 > 0$ and $c_2 > 0$.
+$c_1$ and $c_2$ are both then decremented.
+Once the end of the string is reach, assuming all other conditions are satisfied, the input will be accepted only if $c_1 = 0$ (with no restrictions on value of $c_2$).
+Assuming encoding for $c_1$ and $c_2$ that is not isomorphic to unary, the counters will take $2 \cdot log(n)$ space, where $n$ is the length of the input.
+Thus $L_{OPML} \in L$.
+
+\section{Question 3 - Padding}
+
+\section{Oracles and PSPACE}
 
 \end{document}
 
