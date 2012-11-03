@@ -15,24 +15,43 @@ Window::Window(QWidget* parent)
 	QMenuBar* menuBar = new QMenuBar();
 	QMenu* file = new QMenu(tr("&File"), this);
 	file->addAction("Exit", qApp, SLOT(quit()), Qt::CTRL+Qt::Key_Q);
-	QFileDialog* find = new QFileDialog();
-	file->addAction("Load MD2 Model", find, SLOT(open()), Qt::CTRL+Qt::Key_O);
+	QFileDialog* findModel = new QFileDialog();
+	file->addAction("Load MD2 Model", findModel, SLOT(open()), Qt::CTRL+Qt::Key_O);
+	QFileDialog* findTex = new QFileDialog();
+	file->addAction("Load Texture", findTex, SLOT(open()), Qt::CTRL+Qt::Key_T);
 	menuBar->addMenu(file);
 	mainLayout->setMenuBar(menuBar);
 
-	// Creates MD2 model load and display chain
 	m_modelWindow = new Renderer(this);
+	connect(m_modelWindow, SIGNAL(Error(QString const&)),
+			m_error, SLOT(showMessage(QString const&)));
 	mainLayout->addWidget(m_modelWindow);
-	m_loader = new Md2LoaderWidget();
+
+	// Creates MD2 model load chain
+	m_modLoader = new Md2LoaderWidget();
 	// Select MD2 file to read in
-	connect(find, SIGNAL(fileSelected(QString const&)), 
-			m_loader, SLOT(LoadMd2File(QString const&)));
+	connect(findModel, SIGNAL(fileSelected(QString const&)), 
+			m_modLoader, SLOT(LoadMd2File(QString const&)));
 	// Error handling
-	connect(m_loader, SIGNAL(ErrorLoading(QString const&)),
+	connect(m_modLoader, SIGNAL(ErrorLoading(QString const&)),
 			m_error, SLOT(showMessage(QString const&)));
 	// Render model
-	connect(m_loader, SIGNAL(FinishedLoadingMd2(MD2*)),
+	connect(m_modLoader, SIGNAL(FinishedLoadingMd2(MD2*)),
 			m_modelWindow, SLOT(RenderModel(MD2*)));
+
+	// Creates texture load and display chain
+	m_texLoader = new TexLoaderWidget();
+	// Select MD2 file to read in
+	connect(findTex, SIGNAL(fileSelected(QString const&)), 
+			m_texLoader, SLOT(LoadTexFile(QString const&)));
+	// Error handling
+	connect(m_texLoader, SIGNAL(ErrorLoading(QString const&)),
+			m_error, SLOT(showMessage(QString const&)));
+	// Add texture to model
+	connect(m_texLoader, 
+			SIGNAL(FinishedLoadingTex(unsigned char*, int, int)),
+			m_modelWindow, 
+			SLOT(SetTexture(unsigned char*, int, int)));
 
 	// Creates shading selection drop-down menu
 	QComboBox* viewMode = new QComboBox();
@@ -47,3 +66,4 @@ Window::Window(QWidget* parent)
 	// Sets main layout
 	setLayout(mainLayout);
 }
+

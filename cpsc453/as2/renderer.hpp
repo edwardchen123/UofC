@@ -13,10 +13,12 @@ public:
 	Renderer(QWidget* parent = NULL);
 	~Renderer();
 signals:
-
+	void Error(QString const&);
 public slots:
 	// Accepts pointer to MD2 data and renders it
 	void RenderModel(MD2*);
+	// Sets texture for current model
+	void SetTexture(unsigned char*, int, int);	
 	// Sets shading type
 	void SetShading(int);
 protected:
@@ -29,6 +31,8 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event);
 private:
 	MD2* m_model;
+	unsigned char* m_texture;
+	GLuint m_texID;
 	int m_viewDist;
 	float m_theta;
 	float m_phi;

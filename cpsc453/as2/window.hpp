@@ -6,6 +6,7 @@
 
 #include "renderer.hpp"
 #include "md2_loader_widget.hpp"
+#include "tex_loader_widget.hpp"
 
 // Parent window class
 class Window : public QWidget {
@@ -20,6 +21,7 @@ public slots:
 private:
 	QErrorMessage* m_error;
 	Renderer* m_modelWindow;
-	Md2LoaderWidget* m_loader;
+	Md2LoaderWidget* m_modLoader;
+	TexLoaderWidget* m_texLoader;
 };
 
