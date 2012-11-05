@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+// Utility for loading textures
 class TexLoaderWidget : public QWidget {
 Q_OBJECT
 
