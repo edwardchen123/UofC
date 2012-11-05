@@ -1,5 +1,0 @@
-env = Environment()
-files = env.Glob('*.cpp') + env.Glob('*.cc')
-env.Append(LIBPATH = ['/usr/lib64/octave/3.4.3/'])
-env.Append(LIBS = ['octinterp'])
-env.Program(target = 'a.out', source = files)
