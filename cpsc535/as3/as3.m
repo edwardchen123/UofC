@@ -1,7 +1,7 @@
+source('ml.m');
+
 % Parses command line arguments
-%arg_list = argv();
-arg_list = {'data00.tif'};
-nargin = 1;
+arg_list = argv();
 imagefile = [];
 keys = [];
 trainingMode = 0;
@@ -10,9 +10,11 @@ if (nargin == 2)
 	imagefile = arg_list{1};
 	keyfile = arg_list{2};
 	rawkeys = fileread(keyfile);
-	keys = reshape(rawkeys, 60, 25)';
+	keys = reshape(rawkeys, 62, 25)';
+	load weights.mat
 elseif (nargin == 1)
 	imagefile = arg_list{1};
+	load weights.mat
 else
 	printf('ERROR: invalid number of arguments\n');
 endif
@@ -33,13 +35,12 @@ grayscale = grayscale(newTop:rows(grayscale), :);
 
 % Gets features using provided bwlabel function
 [label, num] = bwlabel(binary, 8);
-printf('done. Found %d features.\n', num);
+printf('done. Found %d distinct features.\n', num);
 
-printf('Mapping features to characters...\n');
 % Maps features to characters
+printf('Mapping features to characters...');
 result = zeros(25, 60);
-%for i = 1:num,
-i = 16;
+for i = 1:num
 	% Isolates each feature
 	mask = i*ones(size(label));
 	isolated = label == mask;
@@ -62,14 +63,13 @@ i = 16;
 
 	% Either trains OCR or OCRs input
 	if (trainingMode == 1)
-		%weights = TrainOCR(boundboxG, keys(xrow, xcol), weights);
+		weights = TrainOCR(boundboxG, boundboxB, keys(xrow, xcol), weights);
 	else
-		%keys(xrow, xcol) = OCR(boundboxG, weights);
+		result(xrow, xcol) = OCR(boundboxG, boundboxB, weights);
 	endif
-%endfor
+endfor
 printf('done.\n');
-%mask = repmat(reshape(1:num, 1, 1, num), [rows(label) columns(label) 1]);
-%isolated = repmat(label, [1 1 num]) == mask;
-%clear mask;
 printf('Output in results.txt.\n');
+save weights.mat weights
+dlmwrite('results.txt', result, '', 0, 0);
 
