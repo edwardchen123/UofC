@@ -2,3 +2,5 @@
 *.swp
 .sconsign.dblite
 *.o
+*.pyc
+build

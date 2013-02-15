@@ -1,6 +1,0 @@
-import os
-Import('env')
-
-env.StaticLibrary(target = 'util', source = env.Glob(os.path.join('source', '*.cpp')))
-env.Append(LIBPATH = [env.Dir('.').abspath])
-
